@@ -1,0 +1,511 @@
+`
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .p10 {
+            padding: 10px;
+        }
+
+        .bg-billnum {
+            background-color: #a3a2a0;
+        }
+
+        .bg-netpay {
+            background-color: #fcede5;
+
+            padding: 3px;
+        }
+
+        .r1 {
+            width: 100%;
+            font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .wi-100 {
+            width: 85%;
+        }
+
+        .wi-50 {
+            width: 50%;
+        }
+
+        .fl {
+            float: left;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .font-family {
+            font-family: Helvetica, Sans-Serif;
+        }
+
+        .text-align-right {
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .word-break {
+            word-break: break-all;
+        }
+
+        #customers {
+            font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            page-break-inside: auto;
+        }
+
+        #customers tr:nth-child(odd) {
+            background-color: #e0e0e0;
+        }
+
+        #customers td,
+        #customers th {
+            border: 1px solid gray;
+            padding: 6px;
+            border-collapse: collapse;
+            width: 100px;
+        }
+
+        .text-align-center {
+            text-align: center;
+        }
+
+        .text-align-left {
+            text-align: left;
+        }
+
+        .bg {
+            background-color: antiquewhite !important;
+        }
+
+        .text-align {
+            text-align: right;
+        }
+
+        .head-bg {
+            padding: 10px;
+            background-color: #f2f2f2;
+        }
+
+        .font-family {
+            font-family: Helvetica, Sans-Serif;
+        }
+
+        .color {
+            background-color: #ffffff !important;
+        }
+
+        .header-font-size {
+            font-size: 16px;
+        }
+
+        .font-size {
+            font-size: 12px;
+        }
+
+        .font-family {
+            font-family: Helvetica, Sans-Serif;
+        }
+
+        .width_100 {
+            width: 100%;
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .line {
+            margin-left: 5px;
+            margin-right: 7px;
+            padding-right: 7px;
+        }
+
+        .main-header {
+            padding: 20px;
+        }
+
+        .text-align {
+            text-align: center;
+        }
+
+        #customers tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .flex {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .flex-50 {
+            width: 50%;
+        }
+
+        .right {
+            float: right;
+        }
+
+        .left {
+            float: left;
+        }
+
+        .margin {
+            margin-bottom: 6px;
+        }
+
+        .p-t-10 {
+            padding-top: 10px;
+        }
+
+        .mar-bottom {
+            margin-bottom: 10px;
+        }
+
+        .mar_20 {
+            padding: 20px;
+        }
+
+        .thfontsize {
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .tdfontsize {
+            font-size: 11px;
+            width: 100%;
+            word-break: break-all;
+        }
+
+        .word-break-word {
+            word-break: break-word !important;
+        }
+
+        @media print {
+            table {
+                page-break-inside: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class='width_100 mar_20'>
+        <div>
+            <p class=" text-align header-font-size font-family"><b>
+                    Audit Resources and Schedule Report
+                </b></p>
+        </div>
+    </div>
+    <% info.forEach(function(report){ %>
+        <table id="customers">
+            <tbody>
+                <tr style="break-inside: avoid">
+                    <th class="thfontsize text-align-left" colspan="10">Audit Resources and Schedule</th>
+                </tr>
+
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">S.No.</th>
+                    <td class="font-size wi-100">
+                        <%= report.form.sno%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Sub Assignment Name</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.sub_assignment_name%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Vote</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.vote%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Year</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.year%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Type of Audit Test</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.audit_type%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">File Number</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.file_number%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Authority Of The Audit</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.audit_authority%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Audit Domain</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.audit_domain%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Audit Subject</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.audit_subject%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Specific Name</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.specific_name%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Auditable Area</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.auditable_area%>
+                    </td>
+                </tr>
+                <tr class="font-size" style="break-inside: avoid">
+                    <th class="thfontsize" style="width: 25%">Classification</th>
+                    <td class="font-size wi-100 word-break">
+                        <%= report.form.classification%>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br /><br />
+        <% if (report.objectives.length>0){%>
+            <table id="customers">
+                <tbody>
+                    <tr style="break-inside: avoid">
+                        <th class="thfontsize text-align-left" colspan="2">Audit Objectives</th>
+                    </tr>
+
+                    <tr style="break-inside: avoid" class="font-size">
+                        <th class="thfontsize">S.No.</th>
+                        <th class="thfontsize">Objective</th>
+                    </tr>
+                    <% report.objectives.forEach(function(objective){ %>
+                        <tr style="break-inside: avoid">
+                            <td class="font-size word-break" style="width: 20%">
+                                <%= objective.sno%>
+                            </td>
+                            <td class="font-size" style="width: 80%">
+                                <%= objective.objective%>
+                            </td>
+                            <% }) %>
+                        </tr>
+                </tbody>
+            </table>
+            <% } %>
+                <br />
+                <% if (report.scopes.length>0){%>
+                    <table id="customers">
+                        <tbody>
+                            <tr style="break-inside: avoid">
+                                <th class="thfontsize text-align-left" colspan="2">Audit Scope</th>
+                            </tr>
+
+                            <tr style="break-inside: avoid" class="font-size">
+                                <th class="thfontsize">Scope</th>
+                                <th class="thfontsize">Limitation of Scope</th>
+                            </tr>
+                            <% report.scopes.forEach(function(scope){ %>
+                                <tr style="break-inside: avoid">
+                                    <td class="font-size word-break" style="width: 20%">
+                                        <%= scope.scope%>
+                                    </td>
+                                    <td class="font-size" style="width: 80%">
+                                        <%= scope.limitation%>
+                                    </td>
+                                    <% }) %>
+                                </tr>
+                        </tbody>
+                    </table>
+                    <% } %>
+
+                        <br />
+                        <% if (report.audit_dates.length>0){%>
+                            <table id="customers">
+                                <tbody>
+                                    <tr style="break-inside: avoid">
+                                        <th class="thfontsize text-align-left" colspan="5">Audit Dates</th>
+                                    </tr>
+
+                                    <tr style="break-inside: avoid" class="font-size">
+                                        <th class="thfontsize">S.No.</th>
+                                        <th class="thfontsize">Description</th>
+                                        <th class="thfontsize">Start Date</th>
+                                        <th class="thfontsize">End Date</th>
+                                        <th class="thfontsize">Duration</th>
+                                    </tr>
+                                    <% report.audit_dates.forEach(function(date){ %>
+                                        <tr style="break-inside: avoid">
+                                            <td class="font-size wi-100 word-break">
+                                                <%= date.sno%>
+                                            </td>
+                                            <td class="font-size wi-100">
+                                                <%= date.description%>
+                                            </td>
+                                            <td class="font-size wi-100">
+                                                <%= date.start_date%>
+                                            </td>
+                                            <td class="font-size wi-100 word-break">
+                                                <%= date.end_date%>
+                                            </td>
+                                            <td class="font-size wi-100 word-break">
+                                                <%= date.duration%>
+                                            </td>
+                                            <% }) %>
+                                        </tr>
+                                </tbody>
+                            </table>
+                            <% } %>
+                                <br /><br />
+                                <% if (report.resource_budget.length>0){%>
+                                    <table id="customers">
+                                        <tbody>
+                                            <tr style="break-inside: avoid">
+                                                <th class="thfontsize text-align-left" colspan="6">Resource and
+                                                    Budget</th>
+                                            </tr>
+
+                                            <tr style="break-inside: avoid" class="font-size">
+                                                <th class="thfontsize" style="width: 15%">S.No.</th>
+                                                <th class="thfontsize">Auditable Area</th>
+                                                <th class="thfontsize">Role</th>
+                                                <th class="thfontsize">Auditor Name</th>
+                                                <th class="thfontsize">Conflict Declaration Status</th>
+                                                <th class="thfontsize" style="width: 20%">Availability</th>
+                                            </tr>
+                                            <% report.resource_budget.forEach(function(resource){ %>
+                                                <tr style="break-inside: avoid" p>
+                                                    <td class="font-size wi-100 word-break" style="width: 15%">
+                                                        <%= resource.sno%>
+                                                    </td>
+                                                    <td class="font-size wi-100">
+                                                        <%= resource.auditable_area%>
+                                                    </td>
+                                                    <td class="font-size wi-100 word-break">
+                                                        <%= resource.role%>
+                                                    </td>
+                                                    <td class="font-size wi-100">
+                                                        <%= resource.auditor_name%>
+                                                    </td>
+                                                    <td class="font-size wi-100 word-break">
+                                                        <%= resource.coi_status%>
+                                                    </td>
+                                                    <td class="font-size wi-100" style="width: 20%">
+                                                        <%= resource.availability%>
+                                                    </td>
+                                                    <% }) %>
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                                    <% } %>
+                                        <br /><br />
+
+                                <% if (report.report_distribution.length>0){%>
+                                    <table id="customers">
+                                        <tbody>
+                                            <tr style="break-inside: avoid">
+                                                <th class="thfontsize text-align-left" colspan="5">Report Distribution
+                                                </th>
+                                            </tr>
+
+                                            <tr style="break-inside: avoid" class="font-size">
+                                                <th class="thfontsize">S.No.</th>
+                                                <th class="thfontsize">Department/Organization</th>
+                                                <th class="thfontsize">Designation</th>
+                                                <th class="thfontsize">Name</th>
+                                                <th class="thfontsize">Email</th>
+                                            </tr>
+                                            <% report.report_distribution.forEach(function(report_dist){ %>
+                                                <tr style="break-inside: avoid">
+                                                    <td class="font-size wi-100">
+                                                        <%= report_dist.sno%>
+                                                    </td>
+                                                    <td class="font-size wi-100 word-break">
+                                                        <%= report_dist.department%>
+                                                    </td>
+                                                    <td class="font-size wi-100">
+                                                        <%= report_dist.designation%>
+                                                    </td>
+                                                    <td class="font-size wi-100 word-break">
+                                                        <%= report_dist.name%>
+                                                    </td>
+                                                    <td class="font-size wi-100">
+                                                        <%= report_dist.email%>
+                                                    </td>
+                                                    <% }) %>
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                                    <% } %>
+                                        <br /><br />
+
+
+                                                <table
+                                                    style="border: 0px solid white; width: 75%; break-inside: auto; font-size: 16px; font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;">
+                                                    <tbody style="border: 0px">
+                                                        <tr style="break-inside: avoid" style="border: 0px; width: 75%">
+                                                            <td style="border: 0px; text-align: left"><b>Estimated Budget:</b>
+                                                                <%= report.form.budget%>
+                                                            </td>
+                                                            <td style="border: 0px; text-align: right"><b>Source of
+                                                                    Funding:</b>
+                                                                <%= report.form.funding_source%>
+                                                            </td>
+                                                        </tr>
+                                                        <tr style="break-inside: avoid" style="border: 0px">
+                                                            <td style="border: 0px; text-align: left"><b>Comments: </b>
+                                                                <%= report.form.comments%>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <br /><br />
+
+                                                <table
+                                                    style="border: 0px solid white; width: 75%; break-inside: auto; font-size: 16px; font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;">
+                                                    <tbody style="border: 0px">
+                                                        <tr style="break-inside: avoid" style="border: 0px; width: 75%">
+                                                            <td style="border: 0px; text-align: left"><b>Created By:</b>
+                                                                <%= report.form.createdBy%>
+                                                            </td>
+                                                            <td style="border: 0px; text-align: right"><b>Created
+                                                                    On:</b>
+                                                                <%= report.form.createdDate%>
+                                                            </td>
+                                                        </tr>
+                                                        <tr style="break-inside: avoid" style="border: 0px; width: 75%">
+                                                            <td style="border: 0px; text-align: left"><b>Approved
+                                                                    By:</b>
+                                                                <%= report.form.approvedBy%>
+                                                            </td>
+                                                            <td style="border: 0px; text-align: right"><b>Approved
+                                                                    On:</b>
+                                                                <%= report.form.approvedDate%>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <% if (info.length>report.form.sno){%>
+                                                    <div style="page-break-after: always"></div>
+                                                    <% } %>
+                                                        <% }) %>
+</body>
+
+</html>
+`

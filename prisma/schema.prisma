@@ -1,0 +1,2664 @@
+datasource postgresql {
+  provider = "postgresql"
+  url      = env("IA_DB_URL")
+}
+
+generator prisma_client {
+  provider = "prisma-client-js"
+}
+
+model AuditHierarchyLevel {
+  id           String   @id @default(cuid())
+  tenant_id    String?
+  name         String   @unique
+  parent_id    String?  @unique
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+  created_at   DateTime @default(now())
+
+  codes        AuditHierarchyCode[]
+  parent_level AuditHierarchyLevel? @relation("AuditHierarchyLevelToAuditHierarchyLevel", fields: [parent_id], references: [id])
+  child_level  AuditHierarchyLevel? @relation("AuditHierarchyLevelToAuditHierarchyLevel")
+  @@unique([parent_id, name])
+}
+
+model AuditHierarchyDetailConf {
+  id                String                     @id @default(cuid())
+  tenant_id         String?
+  ref               String                     @default(cuid())
+  parent_id         String?
+  status            String                     @default("Draft")
+  is_active         Boolean                    @default(true)
+  is_latest         Boolean                    @default(false)
+  is_effective      Boolean                    @default(false)
+  effective_from    DateTime?
+  version_no        Int                        @default(1)
+  version_user      String                     @default("SYSTEM")
+  version_date      DateTime                   @updatedAt
+  parent            AuditHierarchyDetailConf?  @relation("AuditHierarchyDetailConfToAuditHierarchyDetailConf", fields: [parent_id], references: [id])
+  children          AuditHierarchyDetailConf[] @relation("AuditHierarchyDetailConfToAuditHierarchyDetailConf")
+  codes             AuditHierarchyCode[]
+  code_transactions AuditHierarchyCodeTxn[]
+}
+
+model AuditHierarchyCode {
+  id                          String                   @id @default(cuid())
+  tenant_id                   String?
+  name                        String
+  ref_num                     Int                      @default(0)
+  conf_id                     String
+  audit_level_id              String?
+  path                        String                   @unique
+  parent_id                   String?
+  is_active                   Boolean                  @default(true)
+  status                      String                   @default("A")
+  approval_status             String                   @default("Draft")
+  version_no                  Int                      @default(1)
+  version_user                String                   @default("SYSTEM")
+  version_date                DateTime                 @updatedAt
+  audit_level                 AuditHierarchyLevel?     @relation(fields: [audit_level_id], references: [id])
+  config                      AuditHierarchyDetailConf @relation(fields: [conf_id], references: [id])
+  parent                      AuditHierarchyCode?      @relation("AuditHierarchyCodeToAuditHierarchyCode", fields: [parent_id], references: [id])
+  child_codes                 AuditHierarchyCode[]     @relation("AuditHierarchyCodeToAuditHierarchyCode")
+  assessment__level_detail    RiskAssessmentDetail[]   @relation("level_rel")
+  assessment_sub_level_detail RiskAssessmentDetail[]   @relation("sub_level_rel")
+  transations                 AuditHierarchyCodeTxn[]
+
+  @@unique([parent_id, name])
+}
+
+model AuditHierarchyCodeTxn {
+  id           String   @id @default(cuid())
+  tenant_id    String?
+  ref          String   @default(cuid())
+  conf_id      String
+  code_id      String
+  name         String?
+  is_active    Boolean?
+  is_processed Boolean  @default(false)
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+
+  config AuditHierarchyDetailConf @relation(fields: [conf_id], references: [id])
+  code   AuditHierarchyCode       @relation(fields: [code_id], references: [id])
+}
+
+model AuditPlanDef {
+  id                  String    @id @default(cuid())
+  tenant_id           String?
+  ref                 String    @default(cuid())
+  risk_control_level  String
+  audit_program_level String
+  mda_start_month     String
+  mda_start_day       Float
+  mda_end_month       String
+  mda_end_day         Float
+  type_of_auditplan   String    @default("RollOver") //RollOver/Fixed
+  status              String    @default("Draft")
+  is_active           Boolean   @default(true)
+  is_latest           Boolean   @default(false)
+  is_effective        Boolean   @default(false)
+  effective_from      DateTime?
+  version_no          Int       @default(1)
+  version_user        String    @default("SYSTEM")
+  version_date        DateTime  @updatedAt
+}
+
+model AuditProgramStructure {
+  id           String   @id @default(cuid())
+  tenant_id    String?
+  name         String   @unique
+  parent_id    String?  @unique
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+  created_at   DateTime @default(now())
+
+  parent_level AuditProgramStructure? @relation("AuditProgramStructureToAuditProgramStructure", fields: [parent_id], references: [id])
+  child_level  AuditProgramStructure? @relation("AuditProgramStructureToAuditProgramStructure")
+  @@unique([parent_id, name])
+}
+
+model AuditObjectiveDef {
+  id                    String                            @id @default(cuid())
+  tenant_id             String?
+  ref                   String                            @default(cuid())
+  objective             String
+  description           String
+  audit_classification  String
+  status                String                            @default("Draft")
+  is_active             Boolean                           @default(true)
+  is_latest             Boolean                           @default(false)
+  is_effective          Boolean                           @default(false)
+  effective_from        DateTime?
+  version_no            Int                               @default(1)
+  version_user          String                            @default("SYSTEM")
+  version_date          DateTime                          @updatedAt
+  audit_classif_codes   ObjectiveAuditClassifDetail[]
+  audit_openions        AuditOpinionGuidelineConf[]
+  risk_mappings         RiskDefAuditObjectiveDefMapping[]
+  aap_mappings          AAPObjeciveMapping[]
+  commencement_mappings CommencementObjeciveMapping[]
+  audit_scope_details   AuditScopeDetail[]
+  audit_program_detail  AuditProgramDetail[]
+}
+
+model RiskDefAuditObjectiveDefMapping {
+  id           String            @id @default(cuid())
+  tenant_id    String?
+  risk_id      String?
+  control_id   String?
+  objective_id String
+  risk         RiskDef?          @relation(fields: [risk_id], references: [id])
+  control      ControlDef?       @relation(fields: [control_id], references: [id])
+  objective    AuditObjectiveDef @relation(fields: [objective_id], references: [id])
+
+}
+
+model ObjectiveAuditClassifDetail {
+  id            String            @id @default(cuid())
+  tenant_id     String?
+  source_id     String
+  classif_level String
+  classif_codes String
+  version_no    Int               @default(1)
+  version_user  String            @default("SYSTEM")
+  version_date  DateTime          @updatedAt
+  objective     AuditObjectiveDef @relation(fields: [source_id], references: [id])
+}
+
+model AuditProcedureDef {
+  id                      String                        @id @default(cuid())
+  tenant_id               String?
+  ref                     String                        @default(cuid())
+  description             String?
+  name                    String
+  status                  String                        @default("Draft")
+  is_active               Boolean                       @default(true)
+  is_latest               Boolean                       @default(false)
+  is_effective            Boolean                       @default(false)
+  effective_from          DateTime?
+  version_no              Int                           @default(1)
+  version_user            String                        @default("SYSTEM")
+  version_date            DateTime                      @updatedAt
+  tests                   AuditTestDef[]
+  audit_procedure_details AuditProcedureDefDetail[]
+  audit_classif_codes     AuditProcedureClassifDetail[]
+  audit_program_detail    AuditProgramDetail[]
+}
+
+model AuditProcedureDefDetail {
+  id               String             @id @default(cuid())
+  tenant_id        String?
+  procedure_def_id String?
+  risk_id          String?
+  control_id       String?
+  risk             RiskDef?           @relation(fields: [risk_id], references: [id])
+  control          ControlDef?        @relation(fields: [control_id], references: [id])
+  procedure_def    AuditProcedureDef? @relation(fields: [procedure_def_id], references: [id])
+}
+
+model AuditProcedureClassifDetail {
+  id            String            @id @default(cuid())
+  tenant_id     String?
+  source_id     String
+  classif_level String
+  classif_code  String
+  version_no    Int               @default(1)
+  version_user  String            @default("SYSTEM")
+  version_date  DateTime          @updatedAt
+  procedure_def AuditProcedureDef @relation(fields: [source_id], references: [id])
+}
+
+model AuditTestDef {
+  id           String  @id @default(cuid())
+  tenant_id    String?
+  ref          String  @default(cuid())
+  test         String
+  procedure_id String
+
+  version_no        Int                     @default(1)
+  version_user      String                  @default("SYSTEM")
+  version_date      DateTime                @updatedAt
+  procedure         AuditProcedureDef       @relation(fields: [procedure_id], references: [id])
+  test_assignements TestAssignementDetail[]
+}
+
+model ControlDef {
+  id                 String    @id @default(cuid())
+  tenant_id          String?
+  name               String
+  ref                String    @default(cuid())
+  audit_procedure_id String?
+  description        String
+  control_type       String
+  category           String //Comma seperated values, list should configure in ENUMS,take it initailly from mockup screen
+  status             String    @default("Draft")
+  is_active          Boolean   @default(true)
+  is_latest          Boolean   @default(false)
+  is_effective       Boolean   @default(false)
+  effective_from     DateTime?
+  version_no         Int       @default(1)
+  version_user       String    @default("SYSTEM")
+  version_date       DateTime  @updatedAt
+
+  risk_control_mappings              RiskControlDefMapping[]
+  audit_procedure_details            AuditProcedureDefDetail[]
+  audit_scope_details                AuditScopeDetail[]
+  risk_assessment_conclusion_details RiskAssessmentConclusionDetail[]
+  risk_mappings                      RiskDefAuditObjectiveDefMapping[]
+  audit_program_detail               AuditProgramDetail[]
+}
+
+model RiskDef {
+  id             String    @id @default(cuid())
+  tenant_id      String?
+  ref            String    @default(cuid())
+  name           String
+  description    String
+  category       String //Comma seperated values, list should configure in ENUMS,take it initailly from mockup screen
+  status         String    @default("Draft")
+  is_active      Boolean   @default(true)
+  is_latest      Boolean   @default(false)
+  is_effective   Boolean   @default(false)
+  effective_from DateTime?
+
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+
+  audit_classif_codes                AuditClassifCode[]
+  risk_control_mappings              RiskControlDefMapping[]
+  objective_mappings                 RiskDefAuditObjectiveDefMapping[]
+  audit_procedure_details            AuditProcedureDefDetail[]
+  audit_scope_details                AuditScopeDetail[]
+  risk_assessment_conclusion_details RiskAssessmentConclusionDetail[]
+  summary_audit_subject_detail       SummaryAuditSubjectDetail[]
+}
+
+model AuditClassifCode {
+  id            String  @id @default(cuid())
+  tenant_id     String?
+  source_id     String
+  classif_level String
+  classif_code  String
+
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+
+  risks RiskDef @relation(fields: [source_id], references: [id])
+}
+
+model RiskControlDefMapping {
+  id             String      @id @default(cuid())
+  tenant_id      String?
+  riskdef_id     String?
+  control_def_id String?
+  is_active      Boolean     @default(true)
+  version_no     Int         @default(1)
+  version_user   String      @default("SYSTEM")
+  version_date   DateTime    @updatedAt
+  risk           RiskDef?    @relation(fields: [riskdef_id], references: [id])
+  control_def    ControlDef? @relation(fields: [control_def_id], references: [id])
+}
+
+model EntityRiskMaturityDef {
+  id                    String                 @id @default(cuid())
+  tenant_id             String?
+  characteristic        String
+  sample_audit_test     String
+  version_no            Int                    @default(1)
+  version_user          String                 @default("SYSTEM")
+  version_date          DateTime               @updatedAt
+  characteristic_detail CharacteristicDetail[]
+}
+
+model RiskAndControlTransaction {
+  id               String                  @id @default(cuid())
+  tenant_id        String?
+  name             String
+  from_year        Int
+  to_year          Int
+  status           String                  @default("Draft")
+  is_active        Boolean                 @default(true)
+  is_latest        Boolean                 @default(false)
+  is_effective     Boolean                 @default(false)
+  effective_from   DateTime?
+  version_no       Int                     @default(1)
+  version_user     String                  @default("SYSTEM")
+  version_date     DateTime                @updatedAt
+  likelihood       RiskLikelihoodDef[]
+  impact           EntityRiskImpactDef[]
+  evaluation       RiskEvaluationDef[]
+  score_config_def ControlScoreConfigDef[]
+}
+
+model RiskLikelihoodDef {
+  id              String                    @id @default(cuid())
+  tenant_id       String?
+  risk_score      Float
+  risk_control_id String
+  descriptor      String
+  narration       String
+  version_no      Int                       @default(1)
+  version_user    String                    @default("SYSTEM")
+  version_date    DateTime                  @updatedAt
+  risk_control    RiskAndControlTransaction @relation(fields: [risk_control_id], references: [id])
+
+  evaluation_def RiskEvaluationDef[]
+}
+
+//The following both tables covers the functionality of RiskImpact  Tab from Mockup
+//please add the default values to this table from the below mockup screen
+//https://xd.adobe.com/view/193f4f0a-dcfd-4595-783d-7afd17e13372-6f0e/screen/442bb58f-88fa-45f7-9343-e1e48ea27858?fullscreen
+model EntityRiskImpactDef {
+  id              String                    @id @default(cuid())
+  tenant_id       String?
+  score           Float
+  descriptor      String
+  risk_control_id String
+  version_no      Int                       @default(1)
+  version_user    String                    @default("SYSTEM")
+  version_date    DateTime                  @updatedAt
+  risk_control    RiskAndControlTransaction @relation(fields: [risk_control_id], references: [id])
+
+  risk_consequence_mappings RiskConsequenceDefMapping[]
+  evaluation_def            RiskEvaluationDef[]
+}
+
+model RiskConsequenceDefMapping {
+  id                    String                     @id @default(cuid())
+  narration             String
+  entity_risk_imapct_id String
+  entity_risk_imapct    EntityRiskImpactDef        @relation(fields: [entity_risk_imapct_id], references: [id])
+  risk_consequence_id   String
+  risk_consequence      RiskConsequenceCategoryDef @relation(fields: [risk_consequence_id], references: [id])
+}
+
+//please add the default values to this table from the below mockup screen
+//https://xd.adobe.com/view/193f4f0a-dcfd-4595-783d-7afd17e13372-6f0e/screen/442bb58f-88fa-45f7-9343-e1e48ea27858?fullscreen
+model RiskConsequenceCategoryDef {
+  id           String   @id @default(cuid())
+  tenant_id    String?
+  sno          Int
+  category     String
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+
+  mappings RiskConsequenceDefMapping[]
+
+}
+
+//Risk evaluation grid service to be written based on risk likelyhood as x-axis impact as y-axis
+//weight of the cell calculated x*y = value
+
+model ControlScoreConfigDef {
+  id              String                    @id @default(cuid())
+  tenant_id       String?
+  range_start     Float?
+  range_end       Float?
+  no_of_slabs     Int?
+  risk_control_id String
+  risk_control    RiskAndControlTransaction @relation(fields: [risk_control_id], references: [id])
+  version_no      Int                       @default(1)
+  version_user    String                    @default("SYSTEM")
+  version_date    DateTime                  @updatedAt
+  control_scores  ControlScoreDef[]
+}
+
+model ControlScoreDef {
+  id                String                @id @default(cuid())
+  tenant_id         String?
+  slab_no           Int
+  start_range       Float
+  end_range         Float
+  descriptor        String
+  interpretation    String
+  testing_required  String //comma seperated string eighter or both, "Test Of Details/Test Of Controls"
+  control_config_id String
+  control_config    ControlScoreConfigDef @relation(fields: [control_config_id], references: [id])
+
+}
+
+model TransactionRiskRanking {
+  id                 String            @id @default(cuid())
+  tenant_id          String?
+  sno                String
+  applicability_from Int
+  applicability_to   Int
+  start_range        Int
+  end_range          Int
+  no_of_slabs        Int
+  status             String            @default("Draft")
+  is_active          Boolean           @default(true)
+  is_latest          Boolean           @default(false)
+  is_effective       Boolean           @default(false)
+  effective_from     DateTime?
+  version_no         Int               @default(1)
+  version_user       String            @default("SYSTEM")
+  version_date       DateTime          @updatedAt
+  risk_score_def     RiskScoreDef[]
+  risk_criteria_def  RiskCriteriaDef[]
+}
+
+model RiskScoreDef {
+  id            String   @id @default(cuid())
+  tenant_id     String?
+  period        String?
+  no_of_slabs   Float
+  start_range   Float
+  end_range     Float
+  risk_score_id String
+  version_no    Int      @default(1)
+  version_user  String   @default("SYSTEM")
+  version_date  DateTime @updatedAt
+
+  risk_ranking           TransactionRiskRanking @relation(fields: [risk_score_id], references: [id])
+  risk_score_def_details RiskScoreDefDetail[]
+}
+
+model RiskScoreDefDetail {
+  id              String  @id @default(cuid())
+  tenant_id       String?
+  slab_no         Int
+  start_range     Float
+  end_range       Float
+  descriptor      String
+  colour          String //TO be decide the value format
+  audit_timing    String // need to add list of values to ENUMS from the mockup https://xd.adobe.com/view/193f4f0a-dcfd-4595-783d-7afd17e13372-6f0e/screen/f22fd0d4-1b0f-4ad1-9769-9b7b26da8387?fullscreen
+  audit_frequency Int     @default(0)
+
+  version_no             Int                    @default(1)
+  version_user           String                 @default("SYSTEM")
+  version_date           DateTime               @updatedAt
+  risk_score_def_id      String
+  risk_score_def         RiskScoreDef           @relation(fields: [risk_score_def_id], references: [id])
+  risk_assessment_detail RiskAssessmentDetail[]
+}
+
+model RiskCriteriaDef {
+  id            String                        @id @default(cuid())
+  tenant_id     String?
+  sno           Int
+  criteria      String
+  weightage     Float
+  risk_score_id String
+  version_no    Int                           @default(1)
+  version_user  String                        @default("SYSTEM")
+  version_date  DateTime                      @updatedAt
+  risk_ranking  TransactionRiskRanking        @relation(fields: [risk_score_id], references: [id])
+  mapppings     RiskScoreDefCriteriaMapping[]
+}
+
+model RiskScoreDefCriteriaMapping {
+  id               String   @id @default(cuid())
+  risk_criteria_id String
+  risk_score       String
+  description      String
+  version_no       Int      @default(1)
+  version_user     String   @default("SYSTEM")
+  version_date     DateTime @updatedAt
+
+  risk_criteria RiskCriteriaDef @relation(fields: [risk_criteria_id], references: [id])
+}
+
+model RiskEvaluationDef {
+  id                        String  @id @default(cuid())
+  tenant_id                 String?
+  descriptor                String
+  colour_code               String
+  risk_score                Float
+  interpretation_req_action String
+  risk_score_id             String
+  risk_impact_id            String
+  risk_control_id           String
+
+  version_no      Int                       @default(1)
+  version_user    String                    @default("SYSTEM")
+  version_date    DateTime                  @updatedAt
+  risk_control    RiskAndControlTransaction @relation(fields: [risk_control_id], references: [id])
+  risk_likelihood RiskLikelihoodDef         @relation(fields: [risk_score_id], references: [id])
+  risk_imapct     EntityRiskImpactDef       @relation(fields: [risk_impact_id], references: [id])
+}
+
+model FileNumberConf {
+  id               String    @id @default(cuid())
+  tenant_id        String?
+  period_start     DateTime?
+  period_end       DateTime?
+  no_of_components Float
+  delimeter        String
+  version_no       Int       @default(1)
+  version_user     String    @default("SYSTEM")
+  version_date     DateTime  @updatedAt
+
+  components FileNumberComponentDef[]
+}
+
+model FileNumberComponentDef {
+  id                   String         @id @default(cuid())
+  tenant_id            String?
+  sno                  Int
+  component            String
+  component_size       Int
+  component_type       String // values are Number/Aplhabet/AlphaNumeric  hard code from UI any one of th value stores in DB
+  filenumber_config_id String
+  filenumber_config    FileNumberConf @relation(fields: [filenumber_config_id], references: [id])
+}
+
+model AuditOpinionGuidelineConf {
+  id                              String                            @id @default(cuid())
+  tenant_id                       String?
+  ref                             String                            @default(cuid())
+  classification                  String //Comma seperated values
+  audit_objective_id              String?
+  no_of_slabs                     Int
+  status                          String                            @default("Draft")
+  is_active                       Boolean                           @default(true)
+  is_latest                       Boolean                           @default(false)
+  is_effective                    Boolean                           @default(false)
+  effective_from                  DateTime?
+  version_no                      Int                               @default(1)
+  version_user                    String                            @default("SYSTEM")
+  version_date                    DateTime
+  audit_objective                 AuditObjectiveDef?                @relation(fields: [audit_objective_id], references: [id])
+  audit_opinion_guideline_details AuditOpinionGuidelineConfDetail[]
+  classif_codes                   AuditOpinionClassifCode[]
+  aap_objective_mappings          AAPObjeciveMapping[]
+}
+
+model AuditOpinionGuidelineConfDetail {
+  id                     String                    @id @default(cuid())
+  tenant_id              String?
+  slab_no                Int
+  txn_fail_percent_start Float
+  txn_fail_percent_end   Float
+  conclusion_opinion     String
+  description            String
+  guideline_conf_id      String
+  guideline_conf         AuditOpinionGuidelineConf @relation(fields: [guideline_conf_id], references: [id])
+}
+
+model AuditOpinionClassifCode {
+  id            String                    @id @default(cuid())
+  tenant_id     String?
+  source_id     String
+  classif_level String
+  classif_code  String
+  version_no    Int                       @default(1)
+  version_user  String                    @default("SYSTEM")
+  version_date  DateTime                  @updatedAt
+  audit_openion AuditOpinionGuidelineConf @relation(fields: [source_id], references: [id])
+}
+
+model FollowUpAuditConf {
+  id                          String    @id @default(cuid())
+  tenant_id                   String?
+  ref                         String    @default(cuid())
+  treatment_of_followup_audit String
+  grouping_of_findigs         String
+  placemnt_od_identifier      String
+  status                      String    @default("Draft")
+  is_active                   Boolean   @default(true)
+  is_latest                   Boolean   @default(false)
+  is_effective                Boolean   @default(false)
+  effective_from              DateTime?
+  version_no                  Int       @default(1)
+  version_user                String    @default("SYSTEM")
+  version_date                DateTime  @updatedAt
+}
+
+//Audit Universe Management
+model KeyStakeHolder {
+  id             String    @id @default(cuid())
+  tenant_id      String?
+  name           String
+  ref            String    @default(cuid())
+  code           String
+  category       String
+  status         String    @default("Draft")
+  is_active      Boolean   @default(true)
+  is_latest      Boolean   @default(false)
+  is_effective   Boolean   @default(false)
+  effective_from DateTime?
+  version_no     Int       @default(1)
+  version_user   String    @default("SYSTEM")
+  version_date   DateTime  @updatedAt
+}
+
+model MDAProfileDef {
+  id                            String                          @id @default(cuid())
+  tenant_id                     String?
+  mda_code                      String?
+  office_code                   String?
+  mda                           String
+  auditable_area                String
+  auditable_area_code           String
+  auditable_level_id            String
+  from                          Int
+  to                            Int? //if to is null bydefault it is Present
+  applicalble_subsequent_level  Boolean                         @default(false)
+  purpose_mission_mandate       String
+  key_products_services         String
+  is_organization_coa           Boolean                         @default(false) //TO-DO need to copy COA structure here bassed on selection
+  it_in_use                     String
+  ref                           String                          @default(cuid())
+  status                        String                          @default("Draft")
+  is_active                     Boolean                         @default(true)
+  is_latest                     Boolean                         @default(false)
+  is_effective                  Boolean                         @default(false)
+  effective_from                DateTime?
+  version_no                    Int                             @default(1)
+  version_user                  String                          @default("SYSTEM")
+  version_date                  DateTime                        @updatedAt
+  key_strategic_objectives      MDAKeyStrategicObjective[]
+  internal_key_stake_holders    MDAInternalKeyStakeHolder[]
+  external_key_stake_holders    MDAExternalKeyStakeHolder[]
+  policies_processes_other_info MDAPoliciesProcessesOtherInfo[]
+  previous_audit_reports        MDAAuditReport[]
+  management_contacts           MDAManagementContact[]
+  auditable_area_details        MDAAuditableAreaDetail[]
+  addresses                     MDAAddress[]
+  hierarchy_mappings            AuditHierarchyMDAMapping[]
+  risk_assesments               RiskMaturityAssessment[]
+  audit_plan_schedule_details   AuditPlanScheduleDetail[]
+  aap_details                   AAPDetail[]
+  sap_selection_detail          SAPSelectionDetail[]
+  risk_assessment_detail        RiskAssessmentDetail[]
+  summary_auditable_area        SummaryAuditableArea[]
+  iau_devision_detail           IAUDevisionDetail[]
+}
+
+model MDAAddress {
+  id             String        @id @default(cuid())
+  tenant_id      String?
+  mda_profile_id String
+  address_id     String?
+  is_primary     Boolean       @default(false)
+  version_no     Int           @default(1)
+  version_user   String        @default("SYSTEM")
+  version_date   DateTime      @updatedAt
+  address        Address?      @relation(fields: [address_id], references: [id])
+  mda_profile    MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+}
+
+model MDAAuditableAreaDetail {
+  id                  String        @id @default(cuid())
+  tenant_id           String?
+  auditable_area      String
+  auditable_area_code String
+  auditable_level_id  String
+  parent_id           String?
+  auditable_area_id   String
+  mda_profile_id      String
+  version_no          Int           @default(1)
+  version_user        String        @default("SYSTEM")
+  version_date        DateTime      @updatedAt
+  mda_profile         MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+
+}
+
+model MDAKeyStrategicObjective {
+  id                    String        @id @default(cuid())
+  tenant_id             String?
+  objective             String
+  summary_of_strategies String
+  mda_profile_id        String
+  mda_profile           MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+
+}
+
+model MDAInternalKeyStakeHolder {
+  id             String        @id @default(cuid())
+  tenant_id      String?
+  code           String
+  name           String
+  mda_profile_id String
+  mda_profile    MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+}
+
+model MDAExternalKeyStakeHolder {
+  id             String        @id @default(cuid())
+  tenant_id      String?
+  code           String
+  name           String
+  is_active      Boolean       @default(true)
+  mda_profile_id String
+  mda_profile    MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+}
+
+model MDAPoliciesProcessesOtherInfo {
+  id                 String        @id @default(cuid())
+  tenant_id          String?
+  nature_of_document String
+  name               String
+  description        String
+  document_id        String
+  document_link      String?
+  date_of_upload     DateTime      @updatedAt
+  mda_profile_id     String
+  mda_profile        MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+}
+
+model MDAAuditReport {
+  id                   String        @id @default(cuid())
+  tenant_id            String?
+  file_id              String
+  file_ref_no          String
+  audit_name           String
+  audit_classification String
+  audit_type           String
+  year_of_audit        String
+  mda_profile_id       String
+  mda_profile          MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+}
+
+model MDAManagementContact {
+  id             String        @id @default(cuid())
+  tenant_id      String?
+  employee_id    String //TO-DO need to add employees from employee-api when returning the MDA profile data
+  mda_profile_id String
+  mda_profile    MDAProfileDef @relation(fields: [mda_profile_id], references: [id])
+}
+
+model AuditHierarchyMDAMapping {
+  id              String                  @id @default(cuid())
+  tenant_id       String?
+  mda_profile_id  String?
+  ref             String                  @default(cuid())
+  status          String                  @default("Draft")
+  is_active       Boolean                 @default(true)
+  is_latest       Boolean                 @default(false)
+  is_effective    Boolean                 @default(false)
+  effective_from  DateTime?
+  version_no      Int                     @default(1)
+  version_user    String                  @default("SYSTEM")
+  version_date    DateTime                @updatedAt
+  mda_profile     MDAProfileDef?          @relation(fields: [mda_profile_id], references: [id])
+  audit_hierarchy MDAAuditHierarchyCode[]
+}
+
+model MDAAuditHierarchyCode {
+  id                      String                   @id @default(cuid())
+  tenant_id               String?
+  source_id               String
+  classif_level           String
+  classif_code            String
+  audit_hierarchy_mapping AuditHierarchyMDAMapping @relation(fields: [source_id], references: [id])
+}
+
+//#################### ITERATION-II ####################
+
+model ResourcePlanConfig {
+  id             String                     @id @default(cuid())
+  tenant_id      String?
+  ref            String                     @default(cuid())
+  status         String                     @default("Draft")
+  is_active      Boolean                    @default(true)
+  is_latest      Boolean                    @default(false)
+  is_effective   Boolean                    @default(false)
+  effective_from DateTime?
+  version_no     Int                        @default(1)
+  version_user   String                     @default("SYSTEM")
+  version_date   DateTime                   @updatedAt
+  config_details ResourcePlanConfigDetail[]
+}
+
+model ResourcePlanConfigDetail {
+  id           String  @id @default(cuid())
+  tenant_id    String?
+  source_id    String
+  ref          String  @default(cuid())
+  grade        String
+  vacation     Float?
+  holidays     Float?
+  sick_leave   Float?
+  other_leaves Float?
+
+  version_no    Int                @default(1)
+  version_user  String             @default("SYSTEM")
+  version_date  DateTime           @updatedAt
+  config_detail ResourcePlanConfig @relation(fields: [source_id], references: [id])
+  activities    ActivityDetail[]
+  leave_details LeaveDetail[]
+}
+
+model LeaveDetail {
+  id         String                   @id @default(cuid())
+  tenant_id  String?
+  config_id  String
+  order      Int?
+  leave_type String
+  no_of_days Float
+  config     ResourcePlanConfigDetail @relation(fields: [config_id], references: [id])
+
+}
+
+model ActivityDetail {
+  id         String  @id @default(cuid())
+  tenant_id  String?
+  source_id  String
+  activity   String
+  no_of_days Float
+
+  version_no    Int                      @default(1)
+  version_user  String                   @default("SYSTEM")
+  version_date  DateTime                 @updatedAt
+  config_detail ResourcePlanConfigDetail @relation(fields: [source_id], references: [id])
+}
+
+model LocationAllowanceMapping {
+  id             String                           @id @default(cuid())
+  tenant_id      String?
+  from           Int
+  to             Int?
+  ref            String                           @default(cuid())
+  status         String                           @default("Draft")
+  is_active      Boolean                          @default(true)
+  is_latest      Boolean                          @default(false)
+  is_effective   Boolean                          @default(false)
+  effective_from DateTime?
+  version_no     Int                              @default(1)
+  version_user   String                           @default("SYSTEM")
+  version_date   DateTime                         @updatedAt
+  details        LocationAllowanceMappingDetail[]
+}
+
+model LocationAllowanceMappingDetail {
+  id         String  @id @default(cuid())
+  tenant_id  String?
+  ref        String  @default(cuid())
+  grade      String
+  amount     Float
+  mapping_id String
+
+  version_no   Int                      @default(1)
+  version_user String                   @default("SYSTEM")
+  version_date DateTime                 @updatedAt
+  mapping      LocationAllowanceMapping @relation(fields: [mapping_id], references: [id])
+}
+
+model RatecardConfig {
+  id            String  @id @default(cuid())
+  tenant_id     String?
+  from          Int
+  to            Int?
+  expense_head  String
+  unit          String
+  rate_per_unit Float
+
+  ref            String    @default(cuid())
+  status         String    @default("Draft")
+  is_active      Boolean   @default(true)
+  is_latest      Boolean   @default(false)
+  is_effective   Boolean   @default(false)
+  effective_from DateTime?
+  version_no     Int       @default(1)
+  version_user   String    @default("SYSTEM")
+  version_date   DateTime  @updatedAt
+
+  aap_fin_resources AAPFinancialResource[]
+}
+
+model CalendarEvent {
+  id             String    @id @default(cuid())
+  tenant_id      String?
+  event_category String    @default("ACTIVITY")
+  event_type     String
+  source_ref     String?
+  from           DateTime
+  to             DateTime
+  no_of_days     Float?
+  exceeded_days  Float     @default(0)
+  description    String?
+  user_id        String?
+  ref            String    @default(cuid())
+  status         String    @default("Draft")
+  is_active      Boolean   @default(true)
+  is_latest      Boolean   @default(false)
+  is_effective   Boolean   @default(false)
+  effective_from DateTime?
+  version_no     Int       @default(1)
+  version_user   String    @default("SYSTEM")
+  version_date   DateTime  @updatedAt
+}
+
+model HolidayMaster {
+  id          String   @id @default(cuid())
+  tenant_id   String?
+  name        String
+  ref         String   @default(cuid())
+  fin_year    String
+  from        DateTime
+  to          DateTime
+  no_of_days  Float?
+  description String?
+
+  is_active    Boolean  @default(true)
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+}
+
+model WeekendConf {
+  id         String  @id @default(cuid())
+  tenant_id  String?
+  days       String  @default("SATURDAY,SUNDAY")
+  fin_year   String
+  no_of_days Float   @default(2)
+
+  is_active    Boolean  @default(true)
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+}
+
+//######################################################################################
+//Iteration-3
+//######################################################################################
+
+model RiskMaturityAssessment {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  mda_profile_id         String?
+  risk_maturity_category String
+  ia_approach            String
+  reason                 String
+  mda_ia_approach        String?
+  assesment_by           String?
+  period_start_year      Int?
+  period_end_year        Int?
+  period_id              String?
+
+  ref            String    @default(cuid())
+  status         String    @default("Draft")
+  is_active      Boolean   @default(true)
+  is_latest      Boolean   @default(false)
+  is_effective   Boolean   @default(false)
+  effective_from DateTime?
+  version_no     Int       @default(1)
+  version_user   String    @default("SYSTEM")
+  version_date   DateTime  @updatedAt
+
+  mda_profile_def          MDAProfileDef?            @relation(fields: [mda_profile_id], references: [id])
+  characteristic_details   CharacteristicDetail[]
+  audit_plan_sched_details AuditPlanScheduleDetail[]
+}
+
+model CharacteristicDetail {
+  id                          String                 @id @default(cuid())
+  tenant_id                   String?
+  file_id                     String?
+  entity_risk_def_id          String?
+  mgmt_response               String                 @default("No")
+  risk_maturity_assessment_id String
+  risk_maturity_assessment    RiskMaturityAssessment @relation(fields: [risk_maturity_assessment_id], references: [id])
+  entity_risk_def             EntityRiskMaturityDef? @relation(fields: [entity_risk_def_id], references: [id])
+}
+
+model AuditPlanSchedule {
+  id                     String                    @id @default(cuid())
+  tenant_id              String?
+  years_covered          Int
+  period_start_year      Int
+  period_end_year        Int
+  submission_target_date DateTime
+  file_id                String?
+  parent_id              String?                   @unique
+  ref                    String                    @default(cuid())
+  status                 String                    @default("Draft")
+  is_active              Boolean                   @default(true)
+  is_latest              Boolean                   @default(false)
+  is_effective           Boolean                   @default(false)
+  effective_from         DateTime?
+  version_no             Int                       @default(1)
+  version_user           String                    @default("SYSTEM")
+  version_date           DateTime                  @updatedAt
+  parent_level           AuditPlanSchedule?        @relation("AuditPlanScheduleToAuditPlanSchedule", fields: [parent_id], references: [id])
+  child_level            AuditPlanSchedule[]       @relation("AuditPlanScheduleToAuditPlanSchedule")
+  schedule_details       AuditPlanScheduleDetail[]
+  assessments            RiskAssessment[]
+  sap_list               SAP[]
+}
+
+model AuditPlanScheduleDetail {
+  id                         String  @id @default(cuid())
+  tenant_id                  String?
+  ref                        Int
+  mda_profile_id             String?
+  risk_maturity_assesment_id String?
+  level                      String
+  ia_approach                String
+  ciau_ia_approach           String?
+  planning_method            String?
+  schedule_id                String
+
+  version_no              Int                     @default(1)
+  version_user            String                  @default("SYSTEM")
+  version_date            DateTime                @updatedAt
+  plan_schedule           AuditPlanSchedule       @relation(fields: [schedule_id], references: [id])
+  mda_profile_def         MDAProfileDef?          @relation(fields: [mda_profile_id], references: [id])
+  risk_maturity_assesment RiskMaturityAssessment? @relation(fields: [risk_maturity_assesment_id], references: [id])
+  risk_assessments        RiskAssessment[]
+  sap_selection_details   SAPSelectionDetail[]
+}
+
+model RiskAssessment {
+  id                String  @id @default(cuid())
+  tenant_id         String?
+  schedule_id       String?
+  audit_schedule_id String?
+
+  ref                   String                   @default(cuid())
+  status                String                   @default("Draft")
+  is_active             Boolean                  @default(true)
+  is_latest             Boolean                  @default(false)
+  is_effective          Boolean                  @default(false)
+  effective_from        DateTime?
+  version_no            Int                      @default(1)
+  version_user          String                   @default("SYSTEM")
+  version_date          DateTime                 @updatedAt
+  schedule              AuditPlanSchedule?       @relation(fields: [schedule_id], references: [id])
+  audit_schedule_detail AuditPlanScheduleDetail? @relation(fields: [audit_schedule_id], references: [id])
+  assessment_levels     AssessmentByLevel[]
+  sap_selection_details SAPSelectionDetail[]
+  assessment_detail     RiskAssessmentDetail[]
+}
+
+model RiskAssessmentDetail {
+  id                   String               @id @default(cuid())
+  tenant_id            String?
+  level_code           String?
+  sublevel_code        String?
+  auditable_area       String
+  mda_profile_id       String
+  rec_year             String
+  risk_score           Float
+  assessment_id        String
+  level_alias          String?
+  risk_score_id        String?
+  level                AuditHierarchyCode?  @relation(name: "level_rel", fields: [level_code], references: [id])
+  sublevel             AuditHierarchyCode?  @relation(name: "sub_level_rel", fields: [sublevel_code], references: [id])
+  assessment           RiskAssessment       @relation(fields: [assessment_id], references: [id])
+  risk_score_def       RiskScoreDefDetail?  @relation(fields: [risk_score_id], references: [id])
+  mda_profile_def      MDAProfileDef        @relation(fields: [mda_profile_id], references: [id])
+  sap_selection_detail SAPSelectionDetail[]
+
+  @@unique([level_code, sublevel_code, mda_profile_id, rec_year, risk_score, assessment_id])
+}
+
+model AssessmentByLevel {
+  id                    String                 @id @default(cuid())
+  tenant_id             String?
+  level_id              String
+  classif_code          String
+  assessment_id         String
+  assessment            RiskAssessment         @relation(fields: [assessment_id], references: [id])
+  sub_level_assessments AssessmentBySubLevel[]
+}
+
+model AssessmentBySubLevel {
+  id               String               @id @default(cuid())
+  tenant_id        String?
+  level_id         String
+  classif_code     String
+  total_risk_score Float?
+  ref              Int
+  level_alias      String?
+  parent_id        String
+  assessment       AssessmentByLevel    @relation(fields: [parent_id], references: [id])
+  risk_ranks       RiskRankBySubLevel[]
+}
+
+model RiskRankBySubLevel {
+  id        String               @id @default(cuid())
+  tenant_id String?
+  parent_id String
+  risk_type String
+  weight    Float? //TO_DO need to check required? RiskCriteriaDef?
+  rank      Float
+  comments  String?
+  parent    AssessmentBySubLevel @relation(fields: [parent_id], references: [id])
+}
+
+model SAP {
+  id                     String             @id @default(cuid())
+  tenant_id              String?
+  from                   Int
+  to                     Int
+  iau_code               String?
+  period_id              String?
+  audit_plan_schedule_id String?
+  ref                    String             @default(cuid())
+  can_process            Boolean            @default(true)
+  status                 String             @default("Draft")
+  is_active              Boolean            @default(true)
+  is_latest              Boolean            @default(false)
+  is_effective           Boolean            @default(false)
+  effective_from         DateTime?
+  version_no             Int                @default(1)
+  version_user           String             @default("SYSTEM")
+  version_date           DateTime           @updatedAt
+  audit_plan_schedule    AuditPlanSchedule? @relation(fields: [audit_plan_schedule_id], references: [id])
+  sap_items              SAPItem[]
+  aap                    AAP[]
+
+}
+
+model SAPItem {
+  id                    String               @id @default(cuid())
+  tenant_id             String?
+  total_budget          Float?
+  total_auditor_weeks   Float?
+  planning_method       String               @default("ARA") //ARA/NRB
+  sap_id                String
+  ref                   String               @default(cuid())
+  sap                   SAP                  @relation(fields: [sap_id], references: [id])
+  sap_selection_details SAPSelectionDetail[]
+}
+
+model SAPSelectionDetail {
+  id                         String  @id @default(cuid())
+  tenant_id                  String?
+  recommended_year           String?
+  proposed_year              String?
+  proposed_year_reason       String?
+  proposed_year_other_reason String?
+  mda_profile_id             String?
+  budget                     Float
+  auditor_weeks              Float
+  classification             String
+  sap_item_id                String
+  risk_assessment_id         String?
+  risk_assessment_detail_id  String?
+  schedule_detail_id         String?
+
+  sap_item                 SAPItem                  @relation(fields: [sap_item_id], references: [id])
+  risk_assessment          RiskAssessment?          @relation(fields: [risk_assessment_id], references: [id])
+  audit_planscedule_detail AuditPlanScheduleDetail? @relation(fields: [schedule_detail_id], references: [id])
+  risk_assessment_detail   RiskAssessmentDetail?    @relation(fields: [risk_assessment_detail_id], references: [id])
+  mda_profile_def          MDAProfileDef?           @relation(fields: [mda_profile_id], references: [id])
+  nrb_level_details        NRBLevelDetail[]
+  aap_details              AAPDetail[]
+}
+
+model NRBLevelDetail {
+  id                      String             @id @default(cuid())
+  tenant_id               String?
+  sap_selection_detail_id String
+  level_id                String
+  classif_code            String
+  level_alias             String?
+  sap_selection_detail    SAPSelectionDetail @relation(fields: [sap_selection_detail_id], references: [id])
+}
+
+model AAP {
+  id             String    @id @default(cuid())
+  tenant_id      String?
+  sap_id         String?
+  from           Int?
+  to             Int?
+  fin_year_id    String
+  iau_code       String?
+  ref            String    @default(cuid())
+  status         String    @default("Draft")
+  is_active      Boolean   @default(true)
+  is_latest      Boolean   @default(false)
+  is_effective   Boolean   @default(false)
+  effective_from DateTime?
+  version_no     Int       @default(1)
+  version_user   String    @default("SYSTEM")
+  version_date   DateTime  @updatedAt
+
+  sap       SAP?      @relation(fields: [sap_id], references: [id])
+  aap_items AAPItem[]
+}
+
+model AAPItem {
+  id               String  @id @default(cuid())
+  tenant_id        String?
+  aap_id           String?
+  is_edited        Boolean @default(false)
+  audit_type       String  @default("ScheduleAudit") //FollowUpAudit/AdHocAUdit/ConsultingAssignment/
+  ref              String  @default(cuid())
+  execution_status String  @default("Pending")
+
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+
+  aap                AAP?                   @relation(fields: [aap_id], references: [id])
+  aap_item_details   AAPDetail[]
+  aap_sub_assignment AAPSubAssignment[]
+  activity_status    AAPAdminActivityExec[]
+}
+
+model AAPDetail {
+  id                      String   @id @default(cuid())
+  tenant_id               String?
+  ref                     String   @default(cuid())
+  mda_profile_def_id      String?
+  aap_item_id             String
+  classification          String?
+  scope                   String?
+  objective               String?
+  scope_edited            Boolean  @default(false)
+  is_edited               Boolean  @default(false)
+  budget                  Float?
+  total_auditor_weeks     Float?
+  sap_selection_detail_id String?
+  finding_id              String?
+  planned                 Int      @default(1) //1 for Planned 2 for Adhoc
+  version_no              Int      @default(1)
+  version_user            String   @default("SYSTEM")
+  version_date            DateTime @updatedAt
+
+  sap_selection_detail  SAPSelectionDetail?      @relation(fields: [sap_selection_detail_id], references: [id])
+  mda_profile_def       MDAProfileDef?           @relation(fields: [mda_profile_def_id], references: [id])
+  aap_item              AAPItem                  @relation(fields: [aap_item_id], references: [id])
+  finding               AuditFinding?            @relation(fields: [finding_id], references: [id])
+  objective_mappings    AAPObjeciveMapping[]
+  aap_level_details     AAPLevelDetail[]
+  schedule_months       ScheduleMonth[]
+  auditors              AAPAuditor[]
+  financial_resources   AAPFinancialResource[]
+  admin_activity        AAPAdminActivity[]
+  aap_sub_assignments   AAPSubAssignmentDetail[]
+  coi_declarations      COIDeclaration[]
+  commencement_detail   CommencementDetail[]
+  request_list_response RequestListResponse[]
+  assignment_status     AuditAssignmentStatus[]
+  audit_program_details AuditProgramDetail[]
+}
+
+model AAPLevelDetail {
+  id            String    @id @default(cuid())
+  tenant_id     String?
+  aap_detail_id String
+  level_id      String
+  classif_code  String
+  level_alias   String?
+  aap_detail    AAPDetail @relation(fields: [aap_detail_id], references: [id])
+}
+
+model AAPObjeciveMapping {
+  id                   String                     @id @default(cuid())
+  tenant_id            String?
+  is_deleted           Boolean                    @default(false)
+  is_edited            Boolean                    @default(false)
+  objective_id         String?
+  assignment_id        String?
+  aap_detail_id        String
+  guideline_openion_id String?
+  guideline_openion    AuditOpinionGuidelineConf? @relation(fields: [guideline_openion_id], references: [id])
+  objective            AuditObjectiveDef?         @relation(fields: [objective_id], references: [id])
+  assignment           AAPSubAssignmentDetail?    @relation(fields: [assignment_id], references: [id])
+  aap_detail           AAPDetail                  @relation(fields: [aap_detail_id], references: [id])
+}
+
+model ScheduleMonth {
+  id            String    @id @default(cuid())
+  tenant_id     String?
+  seq           Int
+  month         String
+  aap_detail_id String
+  aap_detail    AAPDetail @relation(fields: [aap_detail_id], references: [id])
+}
+
+model AAPAuditor {
+  id                  String              @id @default(cuid())
+  tenant_id           String?
+  admin_activity_id   String?
+  designation         String
+  specialization      String
+  exp_range_start     Float
+  exp_range_end       Float? //if we want to store 3-5 exp start-3 end-5 if it is 15+ start-15 end not required
+  aap_detail_id       String?
+  resource_source     String              @default("Within MDA") //Other MDAs/CIAU/Outsourced(External)
+  is_active           Boolean             @default(true)
+  aap_detail          AAPDetail?          @relation(fields: [aap_detail_id], references: [id])
+  admin_activity      AAPAdminActivity?   @relation(fields: [admin_activity_id], references: [id])
+  aap_auditor_details AAPAuditorDetail[]
+  resource_budget     ResourceAndBudget[]
+}
+
+model AAPAuditorDetail {
+  id              String                    @id @default(cuid())
+  tenant_id       String?
+  aap_auditor_id  String
+  is_active       Boolean                   @default(true)
+  name            String
+  user_id         String?
+  role            String
+  dept_org        String
+  specialization  String
+  days_assigned   Float
+  available_days  Float?
+  prof_charges    Float
+  aap_auditor     AAPAuditor                @relation(fields: [aap_auditor_id], references: [id])
+  expense_details AuditorDayExpenseDetail[]
+  auditor_txns    AAPAuditorDetailTxn[]
+}
+
+model AAPAuditorDetailTxn {
+  id             String            @id @default(cuid())
+  tenant_id      String?
+  replaced_by    String?
+  is_processed   Boolean           @default(false)
+  detail_id      String?
+  version_date   DateTime          @default(now())
+  auditor_detail AAPAuditorDetail? @relation(fields: [detail_id], references: [id])
+}
+
+model AuditorDayExpenseDetail {
+  id                    String                @id @default(cuid())
+  tenant_id             String?
+  planning              String
+  field_work            String
+  reporting             String
+  review                String
+  aap_auditor_detail_id String?
+  fin_resource_id       String?
+  aap_auditor_detail    AAPAuditorDetail?     @relation(fields: [aap_auditor_detail_id], references: [id])
+  fin_resource          AAPFinancialResource? @relation(fields: [fin_resource_id], references: [id])
+}
+
+model AAPFinancialResource {
+  id                String                    @id @default(cuid())
+  tenant_id         String?
+  aap_detail_id     String?
+  admin_activity_id String?
+  rate_card_id      String?
+  ref               Int?
+  expense_head      String? //"Proffesional Charges" is not covered in ratecard config for this no ratecard_id
+  rate_card         RatecardConfig?           @relation(fields: [rate_card_id], references: [id])
+  quantity          Float
+  cost              Float
+  admin_activity    AAPAdminActivity?         @relation(fields: [admin_activity_id], references: [id])
+  aap_detail        AAPDetail?                @relation(fields: [aap_detail_id], references: [id])
+  expense_details   AuditorDayExpenseDetail[]
+}
+
+model AAPAdminActivity {
+  id                   String                 @id @default(cuid())
+  tenant_id            String?
+  category             String?
+  name                 String
+  description          String
+  start_date           DateTime
+  end_date             DateTime
+  aap_item_details_id  String
+  version_no           Int                    @default(1)
+  version_user         String                 @default("SYSTEM")
+  version_date         DateTime               @updatedAt
+  aap_item             AAPDetail              @relation(fields: [aap_item_details_id], references: [id])
+  auditors             AAPAuditor[]
+  fin_resources        AAPFinancialResource[]
+  admin_activity_execs AAPAdminActivityExec[]
+
+}
+
+//######################################################################################
+// ITERATION-4(a)
+//######################################################################################
+
+model AAPSubAssignment {
+  id                      String                   @id @default(cuid())
+  tenant_id               String?
+  app_item_id             String?
+  ref                     String                   @default(cuid())
+  followup_assignment_ref String? // it will generated for followp audits
+  status                  String                   @default("Draft")
+  is_active               Boolean                  @default(true)
+  is_latest               Boolean                  @default(false)
+  is_effective            Boolean                  @default(false)
+  effective_from          DateTime?
+  version_no              Int                      @default(1)
+  version_user            String                   @default("SYSTEM")
+  version_date            DateTime                 @updatedAt
+  aap_item                AAPItem?                 @relation(fields: [app_item_id], references: [id])
+  details                 AAPSubAssignmentDetail[]
+  coi_declarations        COIDeclaration[]
+}
+
+model AAPSubAssignmentDetail {
+  id                 String               @id @default(cuid())
+  tenant_id          String?
+  assignment_id      String
+  aap_detail_id      String?
+  scope              String?
+  version_no         Int                  @default(1)
+  version_user       String               @default("SYSTEM")
+  version_date       DateTime             @updatedAt
+  aap_detail         AAPDetail?           @relation(fields: [aap_detail_id], references: [id])
+  assignment         AAPSubAssignment     @relation(fields: [assignment_id], references: [id])
+  objective_mappings AAPObjeciveMapping[]
+}
+
+model AAPAdminActivityExec {
+  id                  String            @id @default(cuid())
+  tenant_id           String?
+  app_item_id         String?
+  app_adm_activity_id String?
+  remarks             String?
+  exec_status         String
+  ref                 String            @default(cuid())
+  status              String            @default("Draft")
+  is_active           Boolean           @default(true)
+  is_latest           Boolean           @default(false)
+  is_effective        Boolean           @default(false)
+  effective_from      DateTime?
+  version_no          Int               @default(1)
+  version_user        String            @default("SYSTEM")
+  version_date        DateTime          @updatedAt
+  aap_item            AAPItem?          @relation(fields: [app_item_id], references: [id])
+  admin_activity      AAPAdminActivity? @relation(fields: [app_adm_activity_id], references: [id])
+}
+
+model AssignmentActivity {
+  id         String   @id @default(cuid())
+  tenant_id  String?
+  audit_type String[]
+  name       String
+  order      Int
+}
+
+//Conflict of Interest Declaration
+model COIDeclaration {
+  id                  String  @id @default(cuid())
+  tenant_id           String?
+  declarant           String //name of the auditor who is declaring
+  conflict            String?
+  description         String
+  proposed_management String
+
+  ref            String    @default(cuid())
+  assignment_id  String?
+  aap_detail_id  String?
+  status         String    @default("Draft")
+  is_active      Boolean   @default(true)
+  is_latest      Boolean   @default(false)
+  is_effective   Boolean   @default(false)
+  effective_from DateTime?
+  version_no     Int       @default(1)
+  version_user   String    @default("SYSTEM")
+  version_date   DateTime  @updatedAt
+
+  aap_detail AAPDetail?        @relation(fields: [aap_detail_id], references: [id])
+  assignment AAPSubAssignment? @relation(fields: [assignment_id], references: [id])
+}
+
+model AuditCommencementForm {
+  id                            String                              @id @default(cuid())
+  tenant_id                     String?
+  audit_type                    String
+  name                          String?
+  comments                      String
+  vote                          String?
+  scope                         String?
+  limitation_of_scope           String?
+  file_number                   String?
+  year_of_audit                 String?
+  audit_authority               String?                             @default("Approved Annual Audit Plan") // /Request from Management
+  ref                           String                              @default(cuid())
+  status                        String                              @default("Draft")
+  is_active                     Boolean                             @default(true)
+  is_latest                     Boolean                             @default(false)
+  is_effective                  Boolean                             @default(false)
+  effective_from                DateTime?
+  version_no                    Int                                 @default(1)
+  version_user                  String                              @default("SYSTEM")
+  version_date                  DateTime                            @updatedAt
+  audit_dates                   AuditDate[]
+  commencement_details          CommencementDetail[]
+  resource_and_budget           ResourceAndBudget[]
+  report_distribution           ReportDistribution[]
+  adhoc_consulting_details      AdhocConsultingCommencementDetail[]
+  followup_commencement_details FollowUpCommencementDetail[]
+  objective_mappings            CommencementObjeciveMapping[]
+  audit_dates_and_budget        AuditDatesAndBudget[]
+  request_list                  RequestList[]
+  audit_assignment_plan         AuditAssignmentPlan[]
+  audit_programs                AuditProgram[]
+  report_actuals                ReportActual[]
+  audit_closure_forms           AuditClosureForm[]
+  audit_meeting                 AuditMeeting[]
+  engagement_forms              EngagementForm[]
+  audit_register                AuditRegister[]
+  finding_instances             AuditFindingInstance[]
+}
+
+model AdhocConsultingCommencementDetail {
+  id                      String                 @id @default(cuid())
+  tenant_id               String?
+  introduction            String
+  background              String
+  scope                   String
+  limitation_of_scope     String?
+  support_expected        String
+  management_expectation  String
+  audit_commencement_form AuditCommencementForm? @relation(fields: [commencement_id], references: [id])
+  commencement_id         String?
+}
+
+model FollowUpCommencementDetail {
+  id                      String                 @id @default(cuid())
+  tenant_id               String?
+  followup_audit_no       String
+  sub_assignment_ref      String
+  followup_assignment_ref String
+  scope                   String
+  limitation_of_scope     String?
+  scope_doc               String?
+  audit_commencement_form AuditCommencementForm? @relation(fields: [commencement_id], references: [id])
+  commencement_id         String?
+}
+
+model AuditDatesAndBudget {
+  id                      String                 @id @default(cuid())
+  tenant_id               String?
+  start_date              DateTime?
+  end_date                DateTime?
+  time_budget             Float
+  funding_source          String
+  estimated_budget        Float
+  other_reason            String?
+  audit_commencement_form AuditCommencementForm? @relation(fields: [commencement_id], references: [id])
+  commencement_id         String?
+}
+
+model CommencementObjeciveMapping {
+  id                      String                 @id @default(cuid())
+  tenant_id               String?
+  objective_id            String?
+  objective               AuditObjectiveDef?     @relation(fields: [objective_id], references: [id])
+  audit_commencement_form AuditCommencementForm? @relation(fields: [commencement_id], references: [id])
+  commencement_id         String?
+}
+
+model CommencementDetail {
+  id                         String                     @id @default(cuid())
+  tenant_id                  String?
+  aap_detail_id              String?
+  commencement_id            String
+  aap_detail                 AAPDetail?                 @relation(fields: [aap_detail_id], references: [id])
+  audit_commencement_form    AuditCommencementForm      @relation(fields: [commencement_id], references: [id])
+  summary_auditable_area     SummaryAuditableArea[]
+  summary_audit_subject      SummaryAuditSubject[]
+  audit_scope                AuditScope[]
+  inherent_risks             InherentRisk[]
+  control_assessment         ControlAssessment[]
+  residual_risk_assessment   ResidualRiskAssessment[]
+  risk_assessment_conclusion RiskAssessmentConclusion[]
+  audit_worksheet            AuditTestWorksheet[]
+  audit_test_results         AuditTestResult[]
+  audit_findings             AuditFinding[]
+  audit_meeting_details      AuditMeetingDetail[]
+  engagement_form_details    EngagementFormDetail[]
+  reports                    Report[]
+  draft_reports              DraftReport[]
+}
+
+model AuditDate {
+  id              String                @id @default(cuid())
+  tenant_id       String?
+  order           Float
+  description     String?
+  start_date      DateTime
+  end_date        DateTime
+  duration        Float
+  commencement_id String
+  commencement    AuditCommencementForm @relation(fields: [commencement_id], references: [id])
+}
+
+model ResourceAndBudget {
+  id              String                @id @default(cuid())
+  tenant_id       String?
+  status          String                @default("Available")
+  auditable_area  String
+  aap_auditor_id  String?
+  commencement_id String
+  aap_auditor     AAPAuditor?           @relation(fields: [aap_auditor_id], references: [id])
+  commencement    AuditCommencementForm @relation(fields: [commencement_id], references: [id])
+}
+
+model ReportDistribution {
+  id              String                @id @default(cuid())
+  tenant_id       String?
+  department      String
+  designation     String
+  name            String
+  user_id         String?
+  email           String
+  commencement_id String
+  commencement    AuditCommencementForm @relation(fields: [commencement_id], references: [id])
+}
+
+model RequestList {
+  id                    String                @id @default(cuid())
+  tenant_id             String?
+  document_details      DocumentDetail[]
+  commencement_id       String
+  commencement          AuditCommencementForm @relation(fields: [commencement_id], references: [id])
+  request_list_response RequestListResponse[]
+}
+
+model DocumentDetail {
+  id                   String                      @id @default(cuid())
+  tenant_id            String?
+  ref                  Int
+  src_ref              String                      @default(cuid())
+  title                String
+  description          String
+  request_id           String?
+  aap_detail_id        String[]
+  request              RequestList?                @relation(fields: [request_id], references: [id])
+  req_list_resp_detail RequestListResponseDetail[]
+}
+
+model RequestListResponse {
+  id              String  @id @default(cuid())
+  tenant_id       String?
+  aap_detail_id   String?
+  request_list_id String?
+
+  ref                  String                      @default(cuid())
+  status               String                      @default("Draft")
+  is_active            Boolean                     @default(true)
+  is_latest            Boolean                     @default(false)
+  is_effective         Boolean                     @default(false)
+  effective_from       DateTime?
+  version_no           Int                         @default(1)
+  version_user         String                      @default("SYSTEM")
+  version_date         DateTime                    @updatedAt
+  request_list         RequestList?                @relation(fields: [request_list_id], references: [id])
+  aap_detail           AAPDetail?                  @relation(fields: [aap_detail_id], references: [id])
+  req_list_resp_detail RequestListResponseDetail[]
+
+}
+
+model RequestListResponseDetail {
+  id                 String              @id @default(cuid())
+  tenant_id          String?
+  remarks            String?
+  document_id        String
+  uploaded_date      DateTime?
+  document_detail_id String?
+  req_list_resp_id   String
+  req_list_resp      RequestListResponse @relation(fields: [req_list_resp_id], references: [id])
+  document_detail    DocumentDetail?     @relation(fields: [document_detail_id], references: [id])
+}
+
+model SummaryAuditableArea {
+  id                      String  @id @default(cuid())
+  tenant_id               String?
+  commencement_detail_id  String?
+  mda_profile_id          String?
+  file_number             String
+  sub_assignment_name     String
+  audit_period            String
+  purpose                 String //Purpose/mission/mandate
+  governance_process      String
+  risk_management_process String
+  control_env             String
+  financial_arrangements  String
+  fraud_consideration     String
+  audit_criteria          String
+
+  ref                 String              @default(cuid())
+  status              String              @default("Draft")
+  is_active           Boolean             @default(true)
+  is_latest           Boolean             @default(false)
+  is_effective        Boolean             @default(false)
+  effective_from      DateTime?
+  version_no          Int                 @default(1)
+  version_user        String              @default("SYSTEM")
+  version_date        DateTime            @updatedAt
+  mda_profile         MDAProfileDef?      @relation(fields: [mda_profile_id], references: [id])
+  commencement_detail CommencementDetail? @relation(fields: [commencement_detail_id], references: [id])
+}
+
+model SummaryAuditSubject {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+
+  ref                 String                      @default(cuid())
+  status              String                      @default("Draft")
+  is_active           Boolean                     @default(true)
+  is_latest           Boolean                     @default(false)
+  is_effective        Boolean                     @default(false)
+  effective_from      DateTime?
+  version_no          Int                         @default(1)
+  version_user        String                      @default("SYSTEM")
+  version_date        DateTime                    @updatedAt
+  commencement_detail CommencementDetail?         @relation(fields: [commencement_detail_id], references: [id])
+  summary_details     SummaryAuditSubjectDetail[]
+
+}
+
+// TODO - needs to add relation b/w control and risk
+model SummaryAuditSubjectDetail {
+  id                    String                    @id @default(cuid())
+  tenant_id             String?
+  summary_id            String
+  risk_id               String?
+  control_id            String?
+  ref                   Int?
+  document_id           String?
+  risk                  RiskDef?                  @relation(fields: [risk_id], references: [id])
+  version_no            Int                       @default(1)
+  version_user          String                    @default("SYSTEM")
+  version_date          DateTime                  @updatedAt
+  summary_audit_subject SummaryAuditSubject       @relation(fields: [summary_id], references: [id])
+  classif_codes         SummaryAuditSubjectCode[]
+}
+
+model SummaryAuditSubjectCode {
+  id                              String                    @id @default(cuid())
+  tenant_id                       String?
+  level_id                        String
+  level_code                      String
+  summary_audit_subject_detail_id String
+  summary_detail                  SummaryAuditSubjectDetail @relation(fields: [summary_audit_subject_detail_id], references: [id])
+}
+
+model AuditScope {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+
+  ref                 String              @default(cuid())
+  status              String              @default("Draft")
+  is_active           Boolean             @default(true)
+  is_latest           Boolean             @default(false)
+  is_effective        Boolean             @default(false)
+  effective_from      DateTime?
+  version_no          Int                 @default(1)
+  version_user        String              @default("SYSTEM")
+  version_date        DateTime            @updatedAt
+  commencement_detail CommencementDetail? @relation(fields: [commencement_detail_id], references: [id])
+  audit_scope_details AuditScopeDetail[]
+}
+
+model AuditScopeDetail {
+  id                    String               @id @default(cuid())
+  tenant_id             String?
+  risk_id               String?
+  control_id            String?
+  objective_id          String?
+  scope_id              String?
+  risk                  RiskDef?             @relation(fields: [risk_id], references: [id])
+  control               ControlDef?          @relation(fields: [control_id], references: [id])
+  objective             AuditObjectiveDef?   @relation(fields: [objective_id], references: [id])
+  audit_scope           AuditScope?          @relation(fields: [scope_id], references: [id])
+  inherent_risk_details InherentRiskDetail[]
+}
+
+model InherentRisk {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+
+  ref                 String               @default(cuid())
+  status              String               @default("Draft")
+  is_active           Boolean              @default(true)
+  is_latest           Boolean              @default(false)
+  is_effective        Boolean              @default(false)
+  effective_from      DateTime?
+  version_no          Int                  @default(1)
+  version_user        String               @default("SYSTEM")
+  version_date        DateTime             @updatedAt
+  commencement_detail CommencementDetail?  @relation(fields: [commencement_detail_id], references: [id])
+  inherent_details    InherentRiskDetail[]
+}
+
+model InherentRiskDetail {
+  id                         String                    @id @default(cuid())
+  tenant_id                  String?
+  inherent_risk_id           String
+  audit_scope_detail_id      String?
+  likelihood                 Float
+  likelihood_reason          String
+  impact                     Float
+  impact_reason              String
+  total_score                Float
+  audit_scope_detail         AuditScopeDetail?         @relation(fields: [audit_scope_detail_id], references: [id])
+  inherent_risk              InherentRisk              @relation(fields: [inherent_risk_id], references: [id])
+  control_assessment_details ControlAssessmentDetail[]
+}
+
+//######################################################################################
+// ITERATION-4(b)
+//######################################################################################
+
+model ControlAssessment {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+
+  ref                 String                    @default(cuid())
+  status              String                    @default("Draft")
+  is_active           Boolean                   @default(true)
+  is_latest           Boolean                   @default(false)
+  is_effective        Boolean                   @default(false)
+  effective_from      DateTime?
+  version_no          Int                       @default(1)
+  version_user        String                    @default("SYSTEM")
+  version_date        DateTime                  @updatedAt
+  commencement_detail CommencementDetail?       @relation(fields: [commencement_detail_id], references: [id])
+  assessment_details  ControlAssessmentDetail[]
+}
+
+model ControlAssessmentDetail {
+  id                               String                         @id @default(cuid())
+  tenant_id                        String?
+  assessment_id                    String
+  response                         String
+  alternate_control                String?
+  inherent_risk_id                 String?
+  control_assessment               ControlAssessment              @relation(fields: [assessment_id], references: [id])
+  inherent_risk                    InherentRiskDetail?            @relation(fields: [inherent_risk_id], references: [id])
+  residual_risk_assessment_details ResidualRiskAssessmentDetail[]
+}
+
+model ResidualRiskAssessment {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+
+  ref                              String                         @default(cuid())
+  status                           String                         @default("Draft")
+  is_active                        Boolean                        @default(true)
+  is_latest                        Boolean                        @default(false)
+  is_effective                     Boolean                        @default(false)
+  effective_from                   DateTime?
+  version_no                       Int                            @default(1)
+  version_user                     String                         @default("SYSTEM")
+  version_date                     DateTime                       @updatedAt
+  commencement_detail              CommencementDetail?            @relation(fields: [commencement_detail_id], references: [id])
+  residual_risk_assessment_details ResidualRiskAssessmentDetail[]
+}
+
+model ResidualRiskAssessmentDetail {
+  id                           String                   @id @default(cuid())
+  tenant_id                    String?
+  assessment_id                String
+  adequacy                     String
+  effectiveness                String
+  adequacy_reason              String
+  effectiveness_reason         String
+  likelihood                   Float
+  impact                       Float
+  likelihood_reason            String
+  impact_reason                String
+  total_score                  Float
+  control_score                Float
+  control_assessment_detail_id String?
+  control_assessment_detail    ControlAssessmentDetail? @relation(fields: [control_assessment_detail_id], references: [id])
+  residual_risk_assessment     ResidualRiskAssessment   @relation(fields: [assessment_id], references: [id])
+}
+
+model RiskAssessmentConclusion {
+  id                                 String                           @id @default(cuid())
+  tenant_id                          String?
+  commencement_detail_id             String?
+  audit_way_forward                  String?
+  remarks                            String?
+  ref                                String                           @default(cuid())
+  status                             String                           @default("Draft")
+  is_active                          Boolean                          @default(true)
+  is_latest                          Boolean                          @default(false)
+  is_effective                       Boolean                          @default(false)
+  effective_from                     DateTime?
+  version_no                         Int                              @default(1)
+  version_user                       String                           @default("SYSTEM")
+  version_date                       DateTime                         @updatedAt
+  commencement_detail                CommencementDetail?              @relation(fields: [commencement_detail_id], references: [id])
+  risk_assessment_conclusion_details RiskAssessmentConclusionDetail[]
+}
+
+model RiskAssessmentConclusionDetail {
+  id                            String                         @id @default(cuid())
+  tenant_id                     String?
+  risk_assessment_conclusion_id String
+  risk_id                       String?
+  control_id                    String?
+  control_score                 Float
+  audit_method                  String
+  audit_decision                String? //Continue/Defer/Close
+  risk                          RiskDef?                       @relation(fields: [risk_id], references: [id])
+  control                       ControlDef?                    @relation(fields: [control_id], references: [id])
+  risk_assessment_conclusion    RiskAssessmentConclusion       @relation(fields: [risk_assessment_conclusion_id], references: [id])
+  risk_assessment_con_codes     RiskAssessmentConclusionCode[]
+}
+
+model RiskAssessmentConclusionCode {
+  id                     String                         @id @default(cuid())
+  tenant_id              String?
+  level_id               String
+  level_code             String
+  risk_assessment_con_id String
+  risk_assessment_con    RiskAssessmentConclusionDetail @relation(fields: [risk_assessment_con_id], references: [id])
+}
+
+model AuditAssignmentStatus {
+  id            String     @id @default(cuid())
+  state         String
+  status        String
+  aap_detail_id String?
+  aap_detail    AAPDetail? @relation(fields: [aap_detail_id], references: [id])
+
+  @@unique(aap_detail_id)
+}
+
+//##########4(b1)################
+model AuditAssignmentPlan {
+  id                    String  @id @default(cuid())
+  tenant_id             String?
+  audit_commencement_id String?
+  background_info       String?
+
+  ref                String                 @default(cuid())
+  status             String                 @default("Draft")
+  is_active          Boolean                @default(true)
+  is_latest          Boolean                @default(false)
+  is_effective       Boolean                @default(false)
+  effective_from     DateTime?
+  version_no         Int                    @default(1)
+  version_user       String                 @default("SYSTEM")
+  version_date       DateTime               @updatedAt
+  audit_commencement AuditCommencementForm? @relation(fields: [audit_commencement_id], references: [id])
+  contacts           ManagementContact[]
+  team_composition   AuditTeamComposition[]
+  time_fin_resources TimeFinResource[]
+}
+
+model ManagementContact {
+  id                       String              @id @default(cuid())
+  tenant_id                String?
+  sno                      Int
+  auditable_area           String
+  designition              String
+  name                     String
+  email                    String
+  phone                    String
+  audit_assignment_plan_id String
+  audit_assignment_plan    AuditAssignmentPlan @relation(fields: [audit_assignment_plan_id], references: [id])
+}
+
+model AuditTeamComposition {
+  id                       String              @id @default(cuid())
+  tenant_id                String?
+  sno                      Int
+  auditable_area           String
+  role                     String
+  auditor_name             String
+  email                    String
+  phone                    String
+  audit_assignment_plan_id String
+  audit_assignment_plan    AuditAssignmentPlan @relation(fields: [audit_assignment_plan_id], references: [id])
+}
+
+model TimeFinResource {
+  id                       String              @id @default(cuid())
+  tenant_id                String?
+  sno                      Int
+  phase                    String
+  days                     Float
+  resource_cost            Float
+  ope_cost                 Float
+  tottal_cost              Float
+  target_date              DateTime
+  audit_assignment_plan_id String
+  audit_assignment_plan    AuditAssignmentPlan @relation(fields: [audit_assignment_plan_id], references: [id])
+}
+
+model AuditProgram {
+  id                    String  @id @default(cuid())
+  tenant_id             String?
+  audit_commencement_id String?
+
+  ref                String                 @default(cuid())
+  status             String                 @default("Draft")
+  is_active          Boolean                @default(true)
+  is_latest          Boolean                @default(false)
+  is_effective       Boolean                @default(false)
+  effective_from     DateTime?
+  version_no         Int                    @default(1)
+  version_user       String                 @default("SYSTEM")
+  version_date       DateTime               @updatedAt
+  audit_commencement AuditCommencementForm? @relation(fields: [audit_commencement_id], references: [id])
+  details            AuditProgramDetail[]
+}
+
+model AuditProgramDetail {
+  id               String  @id @default(cuid())
+  tenant_id        String?
+  sno              Int     @default(1)
+  ref              String  @default(cuid())
+  audit_program_id String
+  aap_detail_id    String?
+  objective_id     String?
+  control_id       String?
+  procedure_id     String?
+  finding_id       String?
+
+  objective                  AuditObjectiveDef?         @relation(fields: [objective_id], references: [id])
+  control                    ControlDef?                @relation(fields: [control_id], references: [id])
+  procedure                  AuditProcedureDef?         @relation(fields: [procedure_id], references: [id])
+  aap_detail                 AAPDetail?                 @relation(fields: [aap_detail_id], references: [id])
+  audit_program              AuditProgram               @relation(fields: [audit_program_id], references: [id])
+  finding                    AuditFinding?              @relation(fields: [finding_id], references: [id])
+  test_assignements          TestAssignementDetail[]
+  worksheet_details          AuditTestWorksheetDetail[]
+  audit_finding_observations AuditFindingObservation[]
+}
+
+model TestAssignementDetail {
+  id                       String                  @id @default(cuid())
+  tenant_id                String?
+  test_id                  String?
+  auditor_name             String?
+  auditor_id               String
+  start_date               DateTime
+  end_date                 DateTime
+  program_detail_id        String
+  test                     AuditTestDef?           @relation(fields: [test_id], references: [id])
+  program_detail           AuditProgramDetail      @relation(fields: [program_detail_id], references: [id])
+  audit_test_result_detail AuditTestResultDetail[]
+}
+
+model AuditTestWorksheet {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+
+  ref                 String                     @default(cuid())
+  status              String                     @default("Draft")
+  is_active           Boolean                    @default(true)
+  is_latest           Boolean                    @default(false)
+  is_effective        Boolean                    @default(false)
+  effective_from      DateTime?
+  version_no          Int                        @default(1)
+  version_user        String                     @default("SYSTEM")
+  version_date        DateTime                   @updatedAt
+  commencement_detail CommencementDetail?        @relation(fields: [commencement_detail_id], references: [id])
+  worksheet_details   AuditTestWorksheetDetail[]
+}
+
+model AuditTestWorksheetDetail {
+  id                   String              @id @default(cuid())
+  tenant_id            String?
+  sno                  Int                 @default(1)
+  worksheet_id         String
+  type_of_test         String
+  population_size      Float
+  sample_size          Float
+  information_source   String
+  audit_program_id     String?
+  audit_program_detail AuditProgramDetail? @relation(fields: [audit_program_id], references: [id])
+  worksheet            AuditTestWorksheet  @relation(fields: [worksheet_id], references: [id])
+}
+
+model AuditTestResult {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+  type_of_test           String
+
+  ref                 String                  @default(cuid())
+  status              String                  @default("Draft")
+  is_active           Boolean                 @default(true)
+  is_latest           Boolean                 @default(false)
+  is_effective        Boolean                 @default(false)
+  effective_from      DateTime?
+  version_no          Int                     @default(1)
+  version_user        String                  @default("SYSTEM")
+  version_date        DateTime                @updatedAt
+  commencement_detail CommencementDetail?     @relation(fields: [commencement_detail_id], references: [id])
+  test_result_details AuditTestResultDetail[]
+}
+
+model AuditTestResultDetail {
+  id                        String                 @id @default(cuid())
+  tenant_id                 String?
+  sno                       Int                    @default(1)
+  audit_test_seq            String
+  no_of_txns                Int
+  txn_passed                Int
+  txn_failed                Int
+  result_summary            String
+  test_conclusion           String
+  date                      DateTime?
+  status                    String                 @default("Not Done")
+  document_id               String?
+  other_document_id         String?
+  audit_test_result_id      String
+  test_assignment_detail_id String?
+  test_assignment_detail    TestAssignementDetail? @relation(fields: [test_assignment_detail_id], references: [id])
+  audit_test_result         AuditTestResult        @relation(fields: [audit_test_result_id], references: [id])
+}
+
+model AuditFindingInstance {
+  id                String                 @id @default(cuid())
+  tenant_id         String?
+  commencement_id   String?
+  ref               String                 @default(cuid())
+  status            String                 @default("Draft")
+  is_active         Boolean                @default(true)
+  is_latest         Boolean                @default(false)
+  is_effective      Boolean                @default(false)
+  effective_from    DateTime?
+  version_no        Int                    @default(1)
+  version_user      String                 @default("SYSTEM")
+  version_date      DateTime               @updatedAt
+  commencement_from AuditCommencementForm? @relation(fields: [commencement_id], references: [id])
+  findings          AuditFinding[]
+}
+
+model AuditFinding {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+  recurrent_finding      Boolean @default(false)
+  parent_finding_id      String?
+  finding_status         String?
+  finding_remarks        String?
+  finding_instance_id    String?
+
+  ref                    String                    @default(cuid())
+  status                 String                    @default("Draft")
+  is_active              Boolean                   @default(true)
+  is_latest              Boolean                   @default(false)
+  is_effective           Boolean                   @default(false)
+  effective_from         DateTime?
+  version_no             Int                       @default(1)
+  version_user           String                    @default("SYSTEM")
+  version_date           DateTime                  @updatedAt
+  commencement_detail    CommencementDetail?       @relation(fields: [commencement_detail_id], references: [id])
+  parent_finding         AuditFinding?             @relation("AuditFindingToAuditFinding", fields: [parent_finding_id], references: [id])
+  child_finding          AuditFinding[]            @relation("AuditFindingToAuditFinding")
+  finding_observations   AuditFindingObservation[]
+  audit_finding_details  AuditFindingDetail[]
+  audit_register_finding AuditRegisterFinding[]
+  audit_program_detail   AuditProgramDetail[]
+  followup_audit         AAPDetail[]
+  finding_instance       AuditFindingInstance?     @relation(fields: [finding_instance_id], references: [id])
+}
+
+model AuditFindingObservation {
+  id                                String                          @id @default(cuid())
+  tenant_id                         String?
+  audit_program_detail_id           String?
+  audit_finding_id                  String
+  audit_finding                     AuditFinding                    @relation(fields: [audit_finding_id], references: [id])
+  audit_program_detail              AuditProgramDetail?             @relation(fields: [audit_program_detail_id], references: [id])
+  audit_finding_observation_details AuditFindingObservationDetail[]
+}
+
+model AuditFindingObservationDetail {
+  id                           String                  @id @default(cuid())
+  tenant_id                    String?
+  name                         String
+  description                  String
+  status                       String?
+  risk_rating                  String? //High/Significant/Moderate
+  post_fwp_obs                 String?
+  audit_finding_observation_id String
+  audit_finding_observation    AuditFindingObservation @relation(fields: [audit_finding_observation_id], references: [id])
+}
+
+model AuditFindingDetail {
+  id                      String            @id @default(cuid())
+  tenant_id               String?
+  audit_finding_id        String
+  criteria_observation    String
+  title                   String
+  description             String
+  implication             String
+  cause                   String
+  mngmt_response          String?
+  mngmt_response_doc_id   String?
+  category                String? //Reportable/Non Reportable
+  risk_rating             String? //High/Significant/Moderate
+  followup_audit_approach String? //Remote Verification/Targeted/Scheduled
+  recommendations         Recommendation[]
+  mgmt_action_plan        MngmtActionPlan[]
+  audit_finding           AuditFinding      @relation(fields: [audit_finding_id], references: [id])
+
+}
+
+model Recommendation {
+  id                      String             @id @default(cuid())
+  tenant_id               String?
+  sno                     Int                @default(1)
+  recommendation          String
+  status                  String?
+  audit_finding_detail_id String
+  audit_finding_detail    AuditFindingDetail @relation(fields: [audit_finding_detail_id], references: [id])
+}
+
+model MngmtActionPlan {
+  id                      String                @id @default(cuid())
+  tenant_id               String?
+  sno                     Int                   @default(1)
+  ref                     String                @default(cuid())
+  rr_numbers              Int[]
+  action                  String
+  description             String
+  lead_person             String
+  support_person          String
+  start_date              DateTime
+  end_date                DateTime
+  status                  String?
+  document_id             String?
+  audit_finding_detail_id String
+  audit_finding_detail    AuditFindingDetail    @relation(fields: [audit_finding_detail_id], references: [id])
+  audit_register_details  AuditRegisterDetail[]
+}
+
+model AuditMeeting {
+  id                   String   @id @default(cuid())
+  tenant_id            String?
+  commencement_from_id String?
+  location             String
+  proposed_date        DateTime
+  actual_date          DateTime
+  documentation        String
+  meeting_type         String
+  reason               String?
+
+  ref                   String                 @default(cuid())
+  status                String                 @default("Draft")
+  is_active             Boolean                @default(true)
+  is_latest             Boolean                @default(false)
+  is_effective          Boolean                @default(false)
+  effective_from        DateTime?
+  version_no            Int                    @default(1)
+  version_user          String                 @default("SYSTEM")
+  version_date          DateTime               @updatedAt
+  commencemet_form      AuditCommencementForm? @relation(fields: [commencement_from_id], references: [id])
+  audit_meeting_details AuditMeetingDetail[]
+  meeting_agendas       MeetingPoint[]
+  participants          Participant[]
+  meeting_documents     AuditMeetingDocument[]
+}
+
+model AuditMeetingDetail {
+  id                     String              @id @default(cuid())
+  tenant_id              String?
+  audit_meeting_id       String
+  commencement_detail_id String?
+  audit_meeting          AuditMeeting        @relation(fields: [audit_meeting_id], references: [id])
+  commencement_detail    CommencementDetail? @relation(fields: [commencement_detail_id], references: [id])
+}
+
+model AuditMeetingDocument {
+  id               String       @id @default(cuid())
+  tenant_id        String?
+  audit_meeting_id String
+  sno              Int
+  document_name    String
+  document_type    String
+  document_id      String
+  audit_meeting    AuditMeeting @relation(fields: [audit_meeting_id], references: [id])
+}
+
+model MeetingPoint {
+  id          String  @id @default(cuid())
+  tenant_id   String?
+  sno         Float   @default(1)
+  item        String
+  lead_agency String
+  lead_person String
+
+  audit_meeting_id String
+  audit_meeting    AuditMeeting @relation(fields: [audit_meeting_id], references: [id])
+}
+
+model Participant {
+  id          String  @id @default(cuid())
+  tenant_id   String?
+  name        String
+  designation String
+  institution String
+
+  audit_meeting_id String
+  audit_meeting    AuditMeeting @relation(fields: [audit_meeting_id], references: [id])
+}
+
+model ReportActual {
+  id                   String  @id @default(cuid())
+  tenant_id            String?
+  commencement_form_id String?
+  auditor_id           String?
+
+  ref                   String                 @default(cuid())
+  status                String                 @default("Draft")
+  is_active             Boolean                @default(true)
+  is_latest             Boolean                @default(false)
+  is_effective          Boolean                @default(false)
+  effective_from        DateTime?
+  version_no            Int                    @default(1)
+  version_user          String                 @default("SYSTEM")
+  version_date          DateTime               @updatedAt
+  commencement_form     AuditCommencementForm? @relation(fields: [commencement_form_id], references: [id])
+  report_actual_details ReportActualDetail[]
+}
+
+model ReportActualDetail {
+  id               String       @id @default(cuid())
+  tenant_id        String?
+  sno              Int          @default(1)
+  phase            String
+  days             Float
+  resource_cost    Float
+  ope_cost         Float
+  total_cost       Float
+  completion_date  DateTime?
+  report_actual_id String
+  report_actual    ReportActual @relation(fields: [report_actual_id], references: [id])
+}
+
+model AuditClosureForm {
+  id                     String  @id @default(cuid())
+  tenant_id              String?
+  commencement_form_id   String?
+  area_of_exposure       String
+  sugesstion_for_auditor String
+
+  ref                  String                 @default(cuid())
+  status               String                 @default("Draft")
+  is_active            Boolean                @default(true)
+  is_latest            Boolean                @default(false)
+  is_effective         Boolean                @default(false)
+  effective_from       DateTime?
+  version_no           Int                    @default(1)
+  version_user         String                 @default("SYSTEM")
+  version_date         DateTime               @updatedAt
+  commencement_form    AuditCommencementForm? @relation(fields: [commencement_form_id], references: [id])
+  audit_working_papers AuditWorkingPaper[]
+  result_of_assignment ResultOfAssignment[]
+  assignment_info      AssignmentInfo[]
+}
+
+model AuditWorkingPaper {
+  id        String  @id @default(cuid())
+  tenant_id String?
+  sno       Int     @default(1)
+  question  String
+  status    String
+  remarks   String?
+
+  audit_closure_form_id String
+  audit_closure_form    AuditClosureForm @relation(fields: [audit_closure_form_id], references: [id])
+}
+
+model ResultOfAssignment {
+  id        String  @id @default(cuid())
+  tenant_id String?
+  sno       Int     @default(1)
+  item      String
+  value     String
+
+  audit_closure_form_id String
+  audit_closure_form    AuditClosureForm @relation(fields: [audit_closure_form_id], references: [id])
+}
+
+model AssignmentInfo {
+  id                String  @id @default(cuid())
+  tenant_id         String?
+  sno               Int     @default(1)
+  item              String
+  approved_standard String
+  actual            String
+  variance          String
+
+  audit_closure_form_id String
+  audit_closure_form    AuditClosureForm @relation(fields: [audit_closure_form_id], references: [id])
+}
+
+model EngagementForm {
+  id                   String  @id @default(cuid())
+  tenant_id            String?
+  commencement_form_id String?
+  other_reason         String?
+  category             String
+  name                 String
+  description          String
+  report_doc           String
+
+  ref                     String                 @default(cuid())
+  status                  String                 @default("Draft")
+  is_active               Boolean                @default(true)
+  is_latest               Boolean                @default(false)
+  is_effective            Boolean                @default(false)
+  effective_from          DateTime?
+  version_no              Int                    @default(1)
+  version_user            String                 @default("SYSTEM")
+  version_date            DateTime               @updatedAt
+  commencement_form       AuditCommencementForm? @relation(fields: [commencement_form_id], references: [id])
+  engagement_form_details EngagementFormDetail[]
+}
+
+model EngagementFormDetail {
+  id                     String              @id @default(cuid())
+  tenant_id              String?
+  engagemnt_form_id      String
+  commencement_detail_id String?
+  engagement_form        EngagementForm      @relation(fields: [engagemnt_form_id], references: [id])
+  commencement_detail    CommencementDetail? @relation(fields: [commencement_detail_id], references: [id])
+}
+
+model AuditRegister {
+  id                   String  @id @default(cuid())
+  tenant_id            String?
+  commencement_form_id String?
+
+
+  ref                    String                 @default(cuid())
+  status                 String                 @default("Draft")
+  is_active              Boolean                @default(true)
+  is_latest              Boolean                @default(false)
+  is_effective           Boolean                @default(false)
+  effective_from         DateTime?
+  version_no             Int                    @default(1)
+  version_user           String                 @default("SYSTEM")
+  version_date           DateTime               @updatedAt
+  commencement_form      AuditCommencementForm? @relation(fields: [commencement_form_id], references: [id])
+  audit_register_finding AuditRegisterFinding[]
+}
+
+model AuditRegisterFinding {
+  id                String  @id @default(cuid())
+  tenant_id         String?
+  audit_register_id String
+  audit_finding_id  String?
+  finding_status    String?
+
+  audit_finding          AuditFinding?         @relation(fields: [audit_finding_id], references: [id])
+  audit_register         AuditRegister         @relation(fields: [audit_register_id], references: [id])
+  audit_register_details AuditRegisterDetail[]
+}
+
+model AuditRegisterDetail {
+  id                   String               @id @default(cuid())
+  tenant_id            String?
+  register_finding_id  String
+  mngmt_action_plan_id String?
+  date_of_task         DateTime?
+  mngmt_action_status  String?
+  description          String?
+  remarks              String?
+  auditor_status       String?
+  finding_status       String?
+  reported_by          String?
+  is_latest            Boolean              @default(true)
+  mngmt_action_plan    MngmtActionPlan?     @relation(fields: [mngmt_action_plan_id], references: [id])
+  register_finding     AuditRegisterFinding @relation(fields: [register_finding_id], references: [id])
+  supporting_docs      SupportingDoc[]
+}
+
+model SupportingDoc {
+  id                       String              @id @default(cuid())
+  tenant_id                String?
+  sno                      Int                 @default(1)
+  name                     String
+  category                 String
+  document_id              String
+  document_name            String?
+  audit_register_detail_id String
+  audit_register_detail    AuditRegisterDetail @relation(fields: [audit_register_detail_id], references: [id])
+}
+
+//######################################################################################
+// IA-V5
+//######################################################################################
+
+model IAUDevision {
+  id              String              @id @default(cuid())
+  tenant_id       String?
+  code            String
+  full_code       String
+  name            String
+  alias           String
+  iau_office_code String?
+  ref             String              @default(cuid())
+  status          String              @default("Draft")
+  is_active       Boolean             @default(true)
+  is_latest       Boolean             @default(false)
+  is_effective    Boolean             @default(false)
+  effective_from  DateTime?
+  version_no      Int                 @default(1)
+  version_user    String              @default("SYSTEM")
+  version_date    DateTime            @updatedAt
+  details         IAUDevisionDetail[]
+}
+
+model IAUDevisionDetail {
+  id              String         @id @default(cuid())
+  tenant_id       String?
+  is_deleted      Boolean        @default(false)
+  is_active       Boolean        @default(true)
+  mda_profile_id  String?
+  iau_devision_id String
+  iau_devision    IAUDevision    @relation(fields: [iau_devision_id], references: [id])
+  mda_profile     MDAProfileDef? @relation(fields: [mda_profile_id], references: [id])
+}
+
+model Report {
+  id                     String    @id @default(cuid())
+  tenant_id              String?
+  report_type            String    @default("Draft Report") //Final Report
+  submission_date        DateTime  @default(now())
+  approved_date          DateTime?
+  commencement_detail_id String?
+
+  ref                 String              @default(cuid())
+  status              String              @default("Draft")
+  is_active           Boolean             @default(true)
+  is_latest           Boolean             @default(false)
+  is_effective        Boolean             @default(false)
+  effective_from      DateTime?
+  report_version      Int                 @default(1)
+  version_no          Int                 @default(1)
+  version_user        String              @default("SYSTEM")
+  version_date        DateTime            @updatedAt
+  commencement_detail CommencementDetail? @relation(fields: [commencement_detail_id], references: [id])
+  items               ReportItem[]
+}
+
+model ReportItem {
+  id          String  @id @default(cuid())
+  tenant_id   String?
+  sno         Int
+  item        String
+  document_id String?
+  report_id   String
+  report      Report  @relation(fields: [report_id], references: [id])
+}
+
+model DraftReport {
+  id                     String              @id @default(cuid())
+  tenant_id              String?
+  commencement_detail_id String?
+  report_detail          Json?
+  desc_ack               Json?
+  exec_summary           Json?
+  audit_background       Json?
+  audit_scope            Json?
+  process_methodology    Json?
+  audit_finding          Json?
+  conc_openion           Json?
+  closing_meeting        Json?
+  version_no             Int                 @default(1)
+  version_user           String              @default("SYSTEM")
+  version_date           DateTime            @updatedAt
+  commencement_detail    CommencementDetail? @relation(fields: [commencement_detail_id], references: [id])
+}
+
+//######################################################################################
+// COMMON
+//######################################################################################
+
+model SeqConf {
+  tenant_id      String?
+  type           String   @unique
+  key_template   String
+  value_template String
+  input_fields   String
+  dynamic_fields String
+  start_value    Int
+  seq_size       Int
+  version_no     Int      @default(1)
+  version_user   String   @default("SYSTEM")
+  version_date   DateTime @updatedAt
+}
+
+model SeqCode {
+  tenant_id    String?
+  type         String
+  key          String
+  next_value   Int
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+
+  @@unique([type, key])
+}
+
+model Identity {
+  id           String   @id @default(cuid())
+  tenant_id    String?
+  source_id    String
+  ref_key      String
+  version_no   Int      @default(1)
+  version_user String   @default("SYSTEM")
+  version_date DateTime @updatedAt
+}
+
+model Address {
+  id           String       @id @default(cuid())
+  tenant_id    String?
+  line1        String
+  line2        String
+  line3        String
+  pin_code     String
+  country      String
+  state        String
+  district     String
+  sub_district String
+  village      String
+  panchayat    String
+  tier_id      String?
+  is_active    Boolean
+  version_no   Int          @default(1)
+  version_user String       @default("SYSTEM")
+  version_date DateTime     @updatedAt
+  mda_address  MDAAddress[]
+}

@@ -1,0 +1,33 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(http-equiv='X-UA-Compatible', content='IEedge')
+  meta(name='viewport', content='width=device-width,initial-scale=1')
+  meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+  title #{clientName}
+  link(href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700', rel='stylesheet', type='text/css')
+  style.
+    @media screen and (min-width: 768px) {
+    .footer-align {
+    display: inline-block !important;
+    }
+    }
+    @media screen and (max-width: 767px) {
+    .mobile {
+    padding: 5px !important;
+    text-align: left;
+    }
+    .mobile-footer {
+    width: 70.66%
+    }
+    .content-center {
+    margin: auto;
+    }
+    }
+div(style='overflow-x:auto;padding: 10px 0px 10px 0px;')
+  p Dear #{username} ,
+  p
+    | #{message}.
+
+  p Regards,
+  p #{regards} Support

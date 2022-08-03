@@ -1,0 +1,255 @@
+@page {
+    margin: 10mm;
+}
+@font-face {
+    font-family: 'HelveticaNeue-Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('HelveticaNeue-Regular'), url('HelveticaNeue-Regular.woff') format('woff');
+}
+
+@media print {
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    button {
+        display: none;
+    }
+
+    body {
+        margin: 0;
+    }
+}
+body {
+    font-family: 'HelveticaNeue-Regular';
+}
+table {
+    border-collapse: collapse;
+    font-family: 'HelveticaNeue-Regular';
+    width: 100%;
+    border: 2px solid #e0e0e0;
+    page-break-inside: avoid;
+}
+hr {
+    color: #cccccc;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+th {
+    font-weight: bold;
+    background-color: #e0e0e0;
+}
+td,
+th {
+    font-size: 12px !important;
+    padding: 5px 12px 5px 12px !important;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+.table-footer {
+    background-color: #e0e0e0 !important;
+}
+
+.comment-header {
+    background-color: #e0e0e0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+.reviced-color {
+    background-color: #e18e704d;
+}
+
+.page-body {
+    border: 1px solid #cccccc;
+    page-break-inside: avoid;
+}
+
+.page-header {
+    background-color: #7d7d7d;
+    height: 40px;
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+.light-color {
+    color: #fff;
+}
+
+.print-content {
+    padding-right: 10px;
+}
+
+.display-flex {
+    display: flex !important;
+}
+
+.f-12 {
+    font-size: 12px !important;
+}
+.fs-12 {
+    font-size: 12px !important;
+}
+
+.f-14 {
+    font-size: 14px !important;
+}
+
+.f-15 {
+    font-size: 15px !important;
+}
+
+.p_5 {
+    padding: 5px !important;
+}
+.p-10 {
+    padding: 10px !important;
+}
+
+.m-l-7 {
+    margin-left: 7px !important;
+}
+
+.m-t-5 {
+    margin-top: 5px !important;
+}
+
+.m-b-10 {
+    margin-bottom: 10px !important;
+}
+
+.m-t-10 {
+    margin-top: 10px !important;
+}
+
+.w-100 {
+    width: 100% !important;
+}
+
+.width-220 {
+    width: 220px;
+}
+.width-180 {
+    width: 100% !important;
+}
+.w-50 {
+    width: 50% !important;
+}
+.m-b-38 {
+    margin-bottom: 38px !important;
+}
+.m-b-30 {
+    margin-bottom: 30px !important;
+}
+.m-b-20 {
+    margin-bottom: 20px !important;
+}
+.m-t-30 {
+    margin-top: 30px !important;
+}
+.m-t-20 {
+    margin-top: 20px !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.edited {
+    color: #d04c2c;
+}
+.updated {
+    color: #f5a936;
+}
+.display-grid {
+    display: grid;
+}
+.red-bullet {
+    background-color: #d04c2c;
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+.yellow-bullet {
+    background-color: #f5a936;
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
+.exapndable-card {
+    color: #212529;
+    border: 1px solid #d8d8d8;
+}
+.custom-rows-cols {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+}
+.p-l-10 {
+    padding-left: 10px !important;
+}
+.p-datatable .p-datatable-thead > tr > th {
+    border: 1px solid #f8f8f8;
+    background: #f8f8f8;
+    font-size: 14px;
+}
+.p-datatable .p-datatable-tbody > tr {
+    background: #f8f8f8;
+    font-size: 14px;
+}
+.p-datatable .p-datatable-tfoot > tr > td {
+    background: #7d7d7d;
+    color: #fff;
+}
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item .p-checkbox {
+    padding-top: 2px;
+}
+
+.align-chk {
+    align-items: center;
+    display: flex;
+}
+
+.text-ellipses {
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+.m-t-20 {
+    margin-top: 20px !important;
+}
+.m-b-10 {
+    margin-bottom: 10px !important;
+}
+.word-break-word {
+    word-break: break-word !important;
+}

@@ -1,0 +1,538 @@
+<html>
+    <head>
+        <style>
+            .p10 {
+                padding: 10px;
+            }
+
+            .bg-billnum {
+                background-color: #a3a2a0;
+            }
+            .bg-netpay {
+                background-color: #fcede5;
+
+                padding: 3px;
+            }
+
+            .r1 {
+                width: 100%;
+                font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+
+            .wi-100 {
+                width: 85%;
+            }
+
+            .wi-50 {
+                width: 50%;
+            }
+
+            .fl {
+                float: left;
+            }
+
+            .bold {
+                font-weight: bold;
+            }
+
+            .font-family {
+                font-family: Helvetica, Sans-Serif;
+            }
+
+            .text-align-right {
+                text-align: right;
+                font-size: 12px;
+            }
+
+            .word-break {
+                word-break: break-all;
+            }
+
+            #customers {
+                font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+                page-break-inside: avoid;
+            }
+
+            #customers td,
+            #customers th {
+                border: 1px solid gray;
+                padding: 6px;
+                border-collapse: collapse;
+                width: 100px;
+            }
+
+            .text-align-center {
+                text-align: center;
+            }
+
+            .text-align-left {
+                text-align: left;
+            }
+
+            .text-align {
+                text-align: right;
+            }
+
+            .font-family {
+                font-family: Helvetica, Sans-Serif;
+            }
+
+            .header-font-size {
+                font-size: 16px;
+            }
+
+            .font-size {
+                font-size: 12px;
+            }
+
+            .font-family {
+                font-family: Helvetica, Sans-Serif;
+            }
+            .color {
+                background-color: lightgrey !important;
+            }
+
+            .width_100 {
+                width: 100%;
+                margin-left: 5px;
+                margin-right: 5px;
+            }
+
+            .line {
+                margin-left: 5px;
+                margin-right: 7px;
+                padding-right: 7px;
+            }
+
+            .main-header {
+                padding: 20px;
+            }
+
+            .text-align {
+                text-align: center;
+            }
+
+            .flex {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .flex-50 {
+                width: 50%;
+            }
+
+            .right {
+                float: right;
+            }
+
+            .left {
+                float: left;
+            }
+
+            .margin {
+                margin-bottom: 6px;
+            }
+
+            .p-t-10 {
+                padding-top: 10px;
+            }
+
+            .mar-bottom {
+                margin-bottom: 10px;
+            }
+
+            .mar_20 {
+                padding: 20px;
+            }
+
+            .thfontsize {
+                font-size: 12px;
+                text-align: left;
+            }
+
+            .tdfontsize {
+                font-size: 11px;
+                width: 100%;
+                word-break: break-all;
+            }
+
+            .word-break-word {
+                word-break: break-word !important;
+            }
+
+            @media print {
+                table {
+                    page-break-inside: auto;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="width_100 mar_20">
+            <div>
+                <p class="text-align-center header-font-size font-family"><b> Audit Environmental Report </b></p>
+            </div>
+        </div>
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <thead></thead>
+                <table id="customers">
+                    <tbody>
+                        <tr class="font-size color">
+                            <th class="thfontsize">Auditable Area</th>
+                            <th class="thfontsize">File Number</th>
+                            <th class="thfontsize">Sub Assignment Name</th>
+                            <th class="thfontsize">Audit Period</th>
+                        </tr>
+                        <tr>
+                            <td class="font-size wi-100"><%=info.auditable_area%></td>
+                            <td class="font-size wi-100"><%=info.file_number%></td>
+
+                            <td class="font-size wi-100 word-break"><%=info.sub_assignment_name%></td>
+                            <td style="font-size: 12px"><%=info.audit_period%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="10">General Information</th>
+                        <tr>
+                            <th class="thfontsize" colspan="3">Purpose/Mission/Mandate</th>                        </tr>
+                        <tr>
+                            <td class="font-size wi-100" colspan="2"><%= info.purpose_mission_mandate%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="7">Key Strategic Objectives</th>
+                        <tr>
+                            <th class="thfontsize">S.No.</th>
+                            <th class="thfontsize">Key Strategic Objective</th>
+                             <th class="thfontsize">Summary of Strategies</th>
+                        </tr>
+
+                        <% info.key_stategic_objective.forEach(function(detail){ %>
+
+                        <tr>
+                            <td class="tdfontsize wi-100"><%=detail.slno%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.organisational_objective%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.summary_of_strategies%></td>
+                        </tr>
+                    </tbody>
+                    <% }) %>
+                </table>
+            </table>
+        </div>
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="7">Organisational Structure</th>
+                        <% info.auditable_area_levels.forEach(function(detail){ %>
+
+                        <tr>
+                            <td class="tdfontsize wi-100"><%= detail.auditable_area_code%> - <%= detail.auditable_area%></td>
+                        </tr>
+                    </tbody>
+                    <% }) %>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="7">Internal Audit and Previous Audit Reports</th>
+
+                        <tr>
+                            <th class="thfontsize">S.No.</th>
+                            <th class="thfontsize">File No./Ref No.(R)</th>
+                            <th class="thfontsize">Audit Name</th>
+                            <th class="thfontsize">Audit Classification</th>
+                            <th class="thfontsize">Audit Type</th>
+                            <th class="thfontsize">Year of Audit</th>
+                        </tr>
+                        <% info.audit_report.forEach(function(detail){ %>
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%=detail.slno%></td>
+                            <td class="tdfontsize wi-100 word-break"><%=detail.file_no_ref%></td>
+                            <td class="tdfontsize wi-100 word-break"><%=detail.audit_name %></td>
+                            <td class="tdfontsize wi-100 word-break"><%=detail.audit_classification %></td>
+                            <td class="tdfontsize wi-100 word-break"><%=detail.audit_type%></td>
+                            <td class="tdfontsize wi-100 word-break"><%=detail.year_of_audit %></td>
+                        </tr>
+                    </tbody>
+                    <% }) %>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="9">Organizational, Policies, Processes and Other Information</th>
+                        <tr>
+                            <th class="thfontsize">S.No.</th>
+                            <th class="thfontsize">Document Category</th>
+                            <th class="thfontsize">Document Name</th>
+                            <th class="thfontsize">Document Description</th>
+                            <th class="thfontsize">Date of Upload</th>
+                            <th class="thfontsize">Attachment</th>
+                        </tr>
+
+                        <% info.organizational_policies_processes_others.forEach(function(detail){ %>
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.slno%></td>
+
+                            <td class="tdfontsize wi-100"><%=detail.document_category%></td>
+                            <td class="tdfontsize wi-100"><%=detail.document_name%></td>
+                            <td class="tdfontsize wi-100"><%= detail.brief_description%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.date_of_upload %></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.attachment %></td>
+                        </tr>
+                    </tbody>
+                    <% }) %>
+                </table>
+            </table>
+        </div>
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Governance Process</th>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.governance_process%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Risk Management</th>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.risk_management_process%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Control Environment</th>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.control_env%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Information Technology in Use</th>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.it_in_use%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Key Products and Services</th>
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.key_products_services%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="4">Key Stakeholders</th>
+                        <tr>
+                            <th class="thfontsize">S.No.</th>
+                            <th class="thfontsize">Code</th>
+                            <th class="thfontsize">External Stakeholder Name</th>
+                        </tr>
+                        <% info.external_key_stake_holders.forEach(function(detail){ %>
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.slno%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.code%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.external_stakeholder_name%></td>
+
+                            <% }) %>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="4">Key Stakeholders</th>
+                        <tr>
+                            <th class="thfontsize">S.No.</th>
+                            <th class="thfontsize">Code</th>
+                            <th class="thfontsize">Internal Stakeholder Name</th>
+                        </tr>
+                        <% info.internal_key_stake_holders.forEach(function(detail){ %>
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.slno%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.code%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.internal_stakeholder_name%></td>
+
+                            <% }) %>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="7">Management Contacts</th>
+                        <tr>
+                            <th class="thfontsize">S.No.</th>
+                            <th class="thfontsize">Designation</th>
+                            <th class="thfontsize">First Name</th>
+                            <th class="thfontsize">Last Name</th>
+                            <th class="thfontsize">ID Number</th>
+                            <th class="thfontsize">Email</th>
+                            <th class="thfontsize">Phone Number</th>
+                        </tr>
+
+                        <% info.management_contract.forEach(function(detail){ %>
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.slno%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.designation%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.first_name%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.last_name%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.id_number%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.email%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.phone_number%></td>
+                            <% }) %>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="12">Address</th>
+
+                        <tr>
+                            <th class="thfontsize">Address Line 1</th>
+                            <th class="thfontsize">Address Line 2</th>
+                            <th class="thfontsize">Address Line 3</th>
+                            <th class="thfontsize">Region</th>
+                            <th class="thfontsize">Location</th>
+                            <th class="thfontsize">Postal Code</th>
+                            <th class="thfontsize">Country</th>
+                            <th class="thfontsize">Is Primary</th>
+                            <th class="thfontsize">Is Active</th>
+                        </tr>
+
+                        <% info.address.forEach(function(detail){ %>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.address_line_1%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.address_line_2%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.address_line_3%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.region%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.location%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.postal_code%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.country%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.is_primary%></td>
+                            <td class="tdfontsize wi-100 word-break"><%= detail.is_active%></td>
+
+                            <% }) %>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Financial Arrangements</th>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.financial_arrangements%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Fraud Consideration</th>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.fraud_consideration%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+        <div class="main-header">
+            <table id="customers" class="margin">
+                <table id="customers">
+                    <tbody>
+                        <th class="font-size text-align-left color" colspan="5">Audit Criteria</th>
+
+                        <tr>
+                            <td class="tdfontsize wi-100 word-break"><%= info.audit_criteria%></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </table>
+        </div>
+    </body>
+</html>

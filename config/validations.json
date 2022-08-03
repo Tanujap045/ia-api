@@ -1,0 +1,48 @@
+{
+    "COA_SEGMENT_DEF": {
+        "fields": {
+            "NAME": {
+                "validations": [
+                    { "name": "Should not be a duplicate name", "code": "UNIQUE", "is_active": true },
+                    {
+                        "name": "Should not have the same name provided for another level within the segment",
+                        "code": "UNIQUE_AT_LEVEL",
+                        "is_active": true
+                    }
+                ],
+                "is_mandatory": true,
+                "label": "Segment Name",
+                "tooltip": "Segment Name",
+                "data_type": "alphanumeric",
+                "regular_exp": "",
+                "length": 100,
+                "audit": {}
+            }
+        },
+        "validations": [],
+        "attachments": []
+    },
+
+    "COA_SEGMENT_MASTER": {
+        "fields": {
+            "NAME": {
+                "validations": [
+                    {
+                        "name": "should not define the code which is already used under the same parent",
+                        "code": "UNIQUE",
+                        "is_active": true
+                    }
+                ],
+                "is_mandatory": true,
+                "label": "COA SEGMENT",
+                "tooltip": "COA SEGMENT",
+                "data_type": "alphanumeric",
+                "regular_exp": "",
+                "length": 100,
+                "audit": {}
+            }
+        },
+        "validations": [],
+        "attachments": []
+    }
+}

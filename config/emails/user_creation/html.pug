@@ -1,0 +1,49 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(http-equiv='X-UA-Compatible', content='IEedge')
+  meta(name='viewport', content='width=device-width,initial-scale=1')
+  meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+  title #{clientName}
+  link(href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700', rel='stylesheet', type='text/css')
+  style.
+    @media screen and (min-width: 768px) {
+    .footer-align {
+    display: inline-block !important;
+    }
+    }
+    @media screen and (max-width: 767px) {
+    .mobile {
+    padding: 5px !important;
+    text-align: left;
+    }
+    .mobile-footer {
+    width: 70.66%
+    }
+    .content-center {
+    margin: auto;
+    }
+    }
+div(style='overflow-x:auto;padding: 10px 0px 10px 0px;')
+  p
+    | Dear #{firstName} #{lastName},
+  p  Welcome to the #{clientName}.
+  p(style='margin: 13px 0px;') Below are your login credentials:
+  section
+    table.table-response(width='400', border='0', cellpadding='0', cellspacing='0', style='border:1px solid #efefef;')
+      tr
+        td(style='background-color: #dc6900;padding: 8px 16px;text-align: center;border-bottom: 1px solid #efefef;color: #fff;width:30%;') User ID
+        td(style='background-color: #fff;padding: 8px 16px;text-align: center;border-bottom: 1px solid #efefef;width:50%;')
+          | #{userName} (or) #{email}
+      tr
+        td(style='background-color:#dc6900;padding: 8px 16px;text-align: center;border-bottom: 1px solid #efefef;color: #fff;width:30%;') Password
+        td(style='background-color: #fff;padding: 8px 16px;text-align: center;border-bottom: 1px solid #efefef;width:50%;')
+            | #{password}
+  p
+    a(href=`${webLink}`) Click here
+    |  to access the #{clientName} application
+  p
+    | Should you require any clarifications, please feel free to contact us
+    a(href='mailto:#{clientMail}') #{clientMail}
+  p Regards,
+  p #{clientName} Support

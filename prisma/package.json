@@ -1,0 +1,18 @@
+{
+    "name": "ia-db",
+    "license": "UNLICENSED",
+    "version": "0.0.1",
+    "description": "Internal Audit DB",
+    "dependencies": {
+        "@prisma/client": "^2.13.0"
+    },
+    "scripts": {
+        "db:migrate:create": "prisma migrate dev --create-only --preview-feature",
+        "db:migrate:deploy": "prisma migrate deploy --preview-feature",
+        "db:migrate:dev": "prisma migrate dev --preview-feature",
+        "db:migrate:reset": "prisma migrate reset --preview-feature"
+    },
+    "devDependencies": {
+        "@prisma/cli": "^2.13.0"
+    }
+}
